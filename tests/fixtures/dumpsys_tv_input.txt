@@ -1,0 +1,7 @@
+TvInputManagerService (dumpsys tv_input):
+userId: 0
+  inputMap: inputId -> TvInputState
+    com.example.tvinput/.HdmiTvInputService/HW2: TvInputState{info=TvInputInfo{id=com.example.tvinput/.HdmiTvInputService/HW2, type=HDMI, isHardwareInput=true}, state=0}
+    com.example.tvinput/.HdmiTvInputService/HW3: TvInputState{info=TvInputInfo{id=com.example.tvinput/.HdmiTvInputService/HW3, type=HDMI, isHardwareInput=true}, state=0}
+    com.example.tuner/.TunerService: TvInputState{info=TvInputInfo{id=com.example.tuner/.TunerService, type=TUNER, isHardwareInput=false}, state=0}
+    com.example.tvinput/.HdmiTvInputService/HW2: duplicate line TvInputInfo{id=com.example.tvinput/.HdmiTvInputService/HW2, type=HDMI}

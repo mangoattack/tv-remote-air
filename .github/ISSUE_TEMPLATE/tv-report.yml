@@ -1,0 +1,48 @@
+name: TV report
+description: Tell us how TV Remote Air works on your TV or box, working or not.
+title: "[TV] <brand> <model>"
+labels: ["tv-report"]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Brand and model
+      placeholder: e.g. TCL 55C745, Nvidia Shield 2019, Chromecast with Google TV
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android / Google TV version
+      description: "sh tools/tv-info.sh <tv-ip> prints it"
+      placeholder: e.g. Android 12, Google TV
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What works?
+      options:
+        - label: Arrow keys, OK, Back, Home
+        - label: Volume and mute
+        - label: Power off
+        - label: Power on from standby
+        - label: App list and opening apps
+        - label: HDMI inputs
+        - label: Keyboard
+        - label: Touchpad in a TV browser
+        - label: AirPlay Server (screen mirroring)
+        - label: CleanYourTV launcher
+  - type: dropdown
+    id: runs
+    attributes:
+      label: Where does the remote run?
+      options: [Docker, Linux server / Raspberry Pi, My computer, Other]
+  - type: input
+    id: ai
+    attributes:
+      label: Which AI did the setup?
+      placeholder: e.g. Claude Code, Codex, Gemini CLI, by hand
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything that needed a trick, or what failed and the error message. Remove IP addresses and tokens.

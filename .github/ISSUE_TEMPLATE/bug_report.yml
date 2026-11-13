@@ -1,0 +1,26 @@
+name: Bug report
+description: Something in the remote, the tools or the prompt doesn't work.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or error message
+      description: From the browser, the server log (docker logs tv-remote / journalctl -u tv-remote) or the AI. Remove IPs and tokens.
+      render: text
+  - type: input
+    id: tv
+    attributes:
+      label: TV / box and Android version
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and browser
+      placeholder: e.g. iPhone 15, Safari, home screen app

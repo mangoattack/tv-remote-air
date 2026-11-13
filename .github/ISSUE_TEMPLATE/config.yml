@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Help with setting it up
+    url: https://github.com/mangoattack/tv-remote-air/blob/main/docs/TROUBLESHOOTING.md
+    about: Most problems are answered in the troubleshooting guide.
