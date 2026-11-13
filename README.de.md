@@ -475,6 +475,10 @@ Beispiele stehen in der [Anleitung](docs/MANUAL.de.md#sprache-und-home-assistant
 3. Am TV die **Entwickleroptionen** ausschalten.
 </details>
 
+## Warum TV Remote Air
+
+Du suchst eine **Handy-Fernbedienung für Android TV**, **AirPlay auf Google TV**, eine **Fernbedienung wie Apple TV für einen anderen TV**, ein **Touchpad für den TV-Browser** oder **Siri- und Home-Assistant-Steuerung** für deinen TV? Das hier macht alles, selbst gehostet und gratis, und eine KI richtet es für dich ein. Es läuft neben der offiziellen Google-TV-App und neben Aufräum-Projekten wie TV Detox und CleanYourTV.
+
 ## So funktioniert es
 
 Die Fernbedienung ist ein kleiner Webserver (`remote/server.py`, nur Python-Standardbibliothek). Er schickt Tastendrücke, Text und App-Starts über ADB an den TV, dasselbe Werkzeug, das Android-Entwickler nutzen. Dein Handy öffnet ihn als Web-App. Keine Cloud, kein Konto, kein Tracking.

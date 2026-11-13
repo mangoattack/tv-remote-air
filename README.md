@@ -438,6 +438,10 @@ See the [manual](docs/MANUAL.md#voice-and-home-assistant) for examples.
 3. On the TV, turn off **Developer options**.
 </details>
 
+## Why TV Remote Air
+
+Looking for a **phone remote for Android TV**, **AirPlay on Google TV**, an **Apple TV-style remote for a non-Apple TV**, a **touchpad for the TV browser**, or **Siri / Home Assistant control** for your TV? This does all of it, self-hosted and free, and an AI sets it up for you. It works next to the official Google TV remote app and next to debloat projects like TV Detox and CleanYourTV.
+
 ## How it works
 
 The remote is a small web server (`remote/server.py`, Python standard library only). It sends key presses, text and app starts to the TV over ADB, the same tool Android developers use. Your phone opens it as a web app. No cloud, no account, no tracking.
