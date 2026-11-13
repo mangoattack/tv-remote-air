@@ -1,6 +1,6 @@
 <div align="center">
 
-# TV Remote Air
+<img src="docs/images/hero.png" alt="TV Remote Air auf fünf Handys: Touchpad, klassisch, wie Apple TV, App-Liste und Tastatur" width="100%">
 
 ### Dein Handy wird zur Fernbedienung. Dein iPhone bekommt AirPlay. Auf jedem Android TV und Google TV.
 
@@ -9,8 +9,6 @@ Claude Code, Codex oder jede KI mit Terminal richtet alles ein. Du beantwortest 
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT-black)](LICENSE)
 [![Für](https://img.shields.io/badge/f%C3%BCr-Android_TV_%7C_Google_TV-3DDC84?logo=androidtv&logoColor=white)](#hilfe)
 [![English](https://img.shields.io/badge/language-English-lightgrey)](README.md)
-
-<img src="docs/images/hero.png" alt="TV Remote Air auf drei Handys: klassisch, wie Apple TV und Touchpad" width="100%">
 
 </div>
 

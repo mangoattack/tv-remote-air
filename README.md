@@ -1,6 +1,6 @@
 <div align="center">
 
-# TV Remote Air
+<img src="docs/images/hero.png" alt="TV Remote Air on five phones: touchpad, classic layout, Apple TV layout, app list and keyboard" width="100%">
 
 ### Your phone becomes the remote. Your iPhone gets AirPlay. On any Android TV or Google TV.
 
@@ -9,8 +9,6 @@ Claude Code, Codex or any AI with a terminal does the setup. You just answer a f
 [![License](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 [![Works with](https://img.shields.io/badge/works_with-Android_TV_%7C_Google_TV-3DDC84?logo=androidtv&logoColor=white)](#help)
 [![Deutsch](https://img.shields.io/badge/Sprache-Deutsch-lightgrey)](README.de.md)
-
-<img src="docs/images/hero.png" alt="TV Remote Air on three phones: classic layout, Apple TV layout and touchpad" width="100%">
 
 </div>
 
