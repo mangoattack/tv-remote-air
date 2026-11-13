@@ -36,7 +36,7 @@ Claude Code, Codex oder jede KI mit Terminal richtet alles ein. Du beantwortest 
 - **Tastatur**, die live auf dem TV schreibt, während du auf dem Handy tippst.
 - **App-Wechsel** mit allen Apps auf dem TV, plus Schnelltasten für HDMI-Eingänge, Browser oder AirPlay.
 - **Zweites Gerät:** steuere auch eine Streaming-Box am TV, die Lautstärke geht immer an den TV.
-- **Gemacht fürs iPhone** (13 bis 17, Pro und Pro Max) und Android-Handys. Auf den Home-Bildschirm legen, dann öffnet sie sich wie eine App.
+- **Gemacht für jedes iPhone** (vom kleinen SE bis zum Pro Max) und jedes Android-Handy. Auf den Home-Bildschirm legen, dann öffnet sie sich wie eine App.
 - **Deutsch und Englisch** in der App, alles andere in der Sprache, die du am Anfang wählst.
 - **Live-Fortschritt** der Einrichtung in der App, während die KI arbeitet.
 - **Klein:** eine Python-Datei plus `adb`. Läuft in Docker, auf einem Linux-Server oder Raspberry Pi oder auf deinem Computer.

@@ -36,7 +36,7 @@ Claude Code, Codex or any AI with a terminal does the setup. You just answer a f
 - **Keyboard** that types on the TV live while you type on the phone.
 - **App switcher** with every app on the TV, plus quick buttons for HDMI inputs, a browser or AirPlay.
 - **Second device:** control a streaming box behind the TV too; volume always goes to the TV.
-- **Made for iPhone** (13 to 17, Pro and Pro Max) and Android phones. Add it to the home screen and it opens like an app.
+- **Made for every iPhone** (from the small SE to the Pro Max) and every Android phone. Add it to the home screen and it opens like an app.
 - **English and German** in the app, everything else in the language you pick at the start.
 - **Live setup progress** in the app while the AI works.
 - **Small:** one Python file plus `adb`. Runs in Docker, on a Linux server or Raspberry Pi, or on your computer.
