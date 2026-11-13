@@ -52,9 +52,12 @@ Zeit an diese Regeln.
       Kurzbefehle, HomePod c) Alexa-Routine d) Android: Google
       Assistant-Routine oder Tasker e) Sonstiges
    10. Welche Handys? a) iPhone b) Android c) Beides d) Sonstiges
-   11. Schnelltasten auf der Fernbedienung? (mehrere möglich)
-       a) HDMI-Eingänge b) Ein Browser auf dem TV c) AirPlay
-       d) Sonstiges: Apps nennen
+   11. Favoriten als Schnelltasten oben in der Fernbedienung (bis zu
+       3, mehrere möglich)? a) Ein HDMI-Eingang (Box, Konsole, ...)
+       b) Lieblings-Apps c) Browser oder AirPlay d) Sonstiges: selber
+       eintippen. Sobald du mit dem TV verbunden bist, zeig mir die
+       echte Liste seiner HDMI-Eingänge und Apps und lass mich meine
+       Favoriten daraus wählen.
    12. Eine eigene Android-App (APK) für die Fernbedienung? a) Nein,
        die Web-App reicht b) Ja, bau eine (frag mich vor dem Start noch
        einmal) c) Erklär es mir zuerst d) Sonstiges

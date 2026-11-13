@@ -47,8 +47,11 @@ whole time.
       Shortcuts, HomePod c) Alexa routine d) Android: Google Assistant
       routine or Tasker e) Other
    10. Which phones? a) iPhone b) Android c) Both d) Other
-   11. Quick buttons on the remote? (several allowed) a) HDMI inputs
-       b) A browser on the TV c) AirPlay d) Other: name the apps
+   11. Favourites as quick buttons at the top of the remote (up to 3,
+       several allowed)? a) An HDMI input (box, console, ...)
+       b) Favourite apps c) Browser or AirPlay d) Other: type them.
+       Once you are connected to the TV, show me the real list of its
+       HDMI inputs and apps and let me pick my favourites from it.
    12. An extra Android app (APK) for the remote? a) No, the web app is
        enough b) Yes, build one (ask me again before you start)
        c) Explain it first d) Other
