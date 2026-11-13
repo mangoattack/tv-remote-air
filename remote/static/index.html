@@ -261,14 +261,14 @@ const TEXT = {
   en: { apps: "Apps", inputs: "Inputs", keyboard: "Keyboard", clickpad: "Clickpad", touchpad: "Touchpad", volume: "Volume",
     tpHint: "Hold and drag to move the pointer.<br>Further away = faster. Tap = OK.", settings: "Settings",
     layout: "Layout", classic: "Classic", appletv: "Apple TV style", control: "Control", language: "Language",
-    auto: "Automatic", token: "Access token", tokenHint: "Only needed if the server has a token.", progress: "Setup progress",
+    auto: "Automatic", token: "Access token", tokenHint: "Only needed if the server has a token.", progress: "Setup progress", allSettings: "All settings (devices, favourites, assistants)",
     noProgress: "No PROGRESS.md yet.", reload: "Reload", loadingApps: "Loading apps …", noApp: "No app found",
     search: "Search", loadingInputs: "Loading inputs …", noInputs: "This device has no inputs.", kbPlaceholder: "Type to write on the TV",
     clear: "Clear", done: "Done", opening: " is opening", noServer: "Server not reachable", error: "Error", tv: "TV" },
   de: { apps: "Apps", inputs: "Eingänge", keyboard: "Tastatur", clickpad: "Steuerkreuz", touchpad: "Touchpad", volume: "Lautstärke",
     tpHint: "Finger halten und ziehen bewegt den Zeiger.<br>Weiter weg = schneller. Tippen = OK.", settings: "Einstellungen",
     layout: "Aussehen", classic: "Klassisch", appletv: "Wie Apple TV", control: "Steuerung", language: "Sprache",
-    auto: "Automatisch", token: "Zugangs-Token", tokenHint: "Nur nötig, wenn der Server ein Token hat.", progress: "Einrichtungs-Fortschritt",
+    auto: "Automatisch", token: "Zugangs-Token", tokenHint: "Nur nötig, wenn der Server ein Token hat.", progress: "Einrichtungs-Fortschritt", allSettings: "Alle Einstellungen (Geräte, Favoriten, Assistenten)",
     noProgress: "Noch keine PROGRESS.md.", reload: "Neu laden", loadingApps: "Lade Apps …", noApp: "Keine App gefunden",
     search: "Suchen", loadingInputs: "Lade Eingänge …", noInputs: "Dieses Gerät hat keine Eingänge.", kbPlaceholder: "Tippen, um auf dem TV zu schreiben",
     clear: "Löschen", done: "Fertig", opening: " wird geöffnet", noServer: "Server nicht erreichbar", error: "Fehler", tv: "TV" },
@@ -286,6 +286,7 @@ const volDev = () => cfg.devices.find(d => d.id === cfg.volumeDevice) || cur();
 
 // iOS 18+ Safari ticks the Taptic Engine when a switch checkbox toggles; elsewhere use vibrate.
 function haptic() {
+  if (store.get("haptics", "1") === "0") return;
   if (navigator.vibrate) { navigator.vibrate(8); return; }
   try { $("hapticLabel").click(); } catch {}
 }
@@ -438,7 +439,9 @@ document.querySelectorAll("[data-vol]").forEach(el => bindPress(el, () => send(v
 (() => {
   const tp = $("tp"), knob = $("tpKnob"), stick = $("tpStick");
   let sx, sy, x, y, fx, fy, timer = null, moved = false, pending = 0, dir = null, diagFlip = false;
-  const DEAD = 22;                  // finger drift below this never moves the pointer
+  // Speed from Settings → Touchpad speed (1 slow … 5 fast); 3 is the tuned default.
+  const SENS = Math.min(5, Math.max(1, +store.get("tpSens", "3") || 3));
+  const DEAD = 30 - SENS * 3;       // finger drift below this never moves the pointer
   const fast = (d) => {             // one key in flight at most, so nothing piles up and overshoots
     if (pending >= 1) return;
     pending++; api(cur().id + "/key", { key: d }).catch(e => toast(e.message)).finally(() => pending--);
@@ -464,7 +467,7 @@ document.querySelectorAll("[data-vol]").forEach(el => bindPress(el, () => send(v
       const keys = KEYS[dir];
       fast(keys.length === 1 ? keys[0] : keys[(diagFlip = !diagFlip) ? 0 : 1]);
       // Gentle speed curve: 280 ms per step near the dead zone, down to 90 ms far out.
-      wait = Math.max(90, 280 - (dist - DEAD) * 1.5);
+      wait = Math.max(110 - SENS * 7, 340 - SENS * 20 - (dist - DEAD) * (0.9 + SENS * 0.2));
     } else dir = null;
     timer = setTimeout(tick, wait);
   };
@@ -622,7 +625,9 @@ function showSettings() {
     scroll.appendChild(f);
   }
   const prog = el("div", "list"); const pb = el("button"); pb.append(el("span", "", t("progress")), el("small", "", "›"));
-  pb.onclick = showProgress; prog.appendChild(pb); scroll.appendChild(prog);
+  pb.onclick = showProgress; prog.appendChild(pb);
+  const all = el("button"); all.append(el("span", "", t("allSettings")), el("small", "", "›"));
+  all.onclick = () => { location.href = "/settings"; }; prog.appendChild(all); scroll.appendChild(prog);
   openSheet(t("settings"), scroll);
 }
 
@@ -646,6 +651,7 @@ $("tKb").onclick = () => { haptic(); showKeyboard(); };
   document.title = cfg.title;
   if (!cfg.devices.some(d => d.id === current)) current = cfg.devices[0].id;
   renderHeader(); refreshStatus(); setInterval(refreshStatus, 15000);
+  if (location.hash === "#progress") showProgress();
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshStatus(); });
 })();
 </script>

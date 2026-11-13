@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>Settings · TV Remote</title>
+<style>
+  :root {
+    --bg: #000; --fill: #1c1c1e; --fill2: #2c2c2e; --fill3: #3a3a3c; --sep: rgba(84,84,88,.6);
+    --text: #fff; --muted: #8e8e93; --accent: #0a84ff; --grad: linear-gradient(135deg, #5e5ce6, #0a84ff);
+    --red: #ff453a; --green: #30d158;
+    --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 17px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; letter-spacing: -.01em; }
+  body { padding: calc(var(--st) + 8px) 16px calc(var(--sb) + 110px); }
+  main { max-width: 640px; margin: 0 auto; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+  [hidden] { display: none !important; }
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 14px; position: sticky; top: 0;
+    background: linear-gradient(var(--bg) 75%, transparent); z-index: 5; }
+  .top a { color: var(--accent); text-decoration: none; font-size: 17px; display: flex; align-items: center; gap: 4px; }
+  h1 { font-size: 32px; font-weight: 700; margin: 0 0 18px; letter-spacing: .01em; }
+  h2 { color: var(--muted); font-size: 13px; font-weight: 400; text-transform: uppercase; letter-spacing: .03em; margin: 26px 16px 7px; }
+  .note { color: var(--muted); font-size: 13px; margin: 7px 16px 0; line-height: 1.4; }
+  .group { background: var(--fill); border-radius: 12px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 8px 16px; }
+  .group > * + * { border-top: .5px solid var(--sep); }
+  .row label, .row .lbl { flex: 1; }
+  .row input[type=text], .row input[type=password], .row input[type=number], .row select {
+    flex: 1.4; min-width: 0; font: inherit; color: var(--text); background: transparent; border: 0; outline: none; text-align: right; }
+  .row select { -webkit-appearance: none; appearance: none; direction: rtl; color: var(--muted); }
+  .row input::placeholder { color: #5a5a5e; }
+  .row input[type=range] { flex: 1.4; accent-color: var(--accent); }
+  .seg { display: flex; background: var(--fill2); border-radius: 9px; padding: 2px; gap: 2px; }
+  .seg button { padding: 6px 12px; border-radius: 7px; font-size: 14px; font-weight: 500; color: #d1d1d6; }
+  .seg button.on { background: #636366; color: #fff; }
+  .row label.switch, .switch { position: relative; width: 51px; height: 31px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; background: #39393d; border-radius: 31px; transition: background .2s; }
+  .switch span::after { content: ""; position: absolute; left: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
+    transition: transform .2s; box-shadow: 0 2px 4px rgba(0,0,0,.3); }
+  .switch input:checked + span { background: var(--green); }
+  .switch input:checked + span::after { transform: translateX(20px); }
+  .link { color: var(--accent); }
+  .danger { color: var(--red); }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 16px; }
+  .chip { background: var(--fill2); border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 500; color: var(--accent); }
+  .chip:active, .icon:active { opacity: .6; }
+  .dev { background: var(--fill); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .dev > * + * { border-top: .5px solid var(--sep); }
+  .devhead { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-weight: 600; }
+  .devhead .dot { width: 9px; height: 9px; border-radius: 50%; background: #48484a; }
+  .dot.ok { background: var(--green) !important; } .dot.bad { background: var(--red) !important; }
+  .devhead .grow { flex: 1; }
+  .fav { display: flex; align-items: center; gap: 8px; padding: 9px 12px 9px 16px; }
+  .fav .lbl { flex: 1; min-width: 0; }
+  .fav .lbl input { width: 100%; font: inherit; color: var(--text); background: transparent; border: 0; outline: none; }
+  .fav small { display: block; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .icon { width: 32px; height: 32px; border-radius: 8px; background: var(--fill2); display: grid; place-items: center; color: #d1d1d6; flex: none; }
+  .icon svg { width: 16px; height: 16px; }
+  .picker { max-height: 300px; overflow-y: auto; }
+  .picker button { width: 100%; text-align: left; padding: 11px 16px; display: flex; justify-content: space-between; gap: 10px; }
+  .picker button + button { border-top: .5px solid var(--sep); }
+  .picker button small { color: var(--muted); }
+  pre { margin: 0; padding: 12px 16px; font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace; color: #d1d1d6; white-space: pre-wrap; word-break: break-all;
+    -webkit-user-select: text; user-select: text; }
+  .copy { float: right; margin: 8px 10px 0 0; }
+  .save { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(var(--sb) + 12px);
+    background: rgba(18,18,20,.88); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--sep); z-index: 6; }
+  .save div { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+  .save .msg { flex: 1; font-size: 14px; color: var(--muted); }
+  .save button { background: var(--grad); color: #fff; font-weight: 600; border-radius: 12px; padding: 12px 22px; }
+  .save button:disabled { opacity: .4; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a href="/"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg><span data-t="remote">Remote</span></a></div>
+  <h1 data-t="settings">Settings</h1>
+
+  <!-- On this phone: stored in the browser only -->
+  <h2 data-t="thisPhone">On this phone</h2>
+  <div class="group">
+    <div class="row"><span class="lbl" data-t="language">Language</span>
+      <div class="seg" id="segLang"><button data-v="auto" data-t="auto">Auto</button><button data-v="de">Deutsch</button><button data-v="en">English</button></div></div>
+    <div class="row"><span class="lbl" data-t="layout">Layout</span>
+      <div class="seg" id="segLayout"><button data-v="classic" data-t="classic">Classic</button><button data-v="atv" data-t="appletv">Apple TV</button></div></div>
+    <div class="row"><span class="lbl" data-t="control">Control</span>
+      <div class="seg" id="segMode"><button data-v="pad" data-t="clickpad">Clickpad</button><button data-v="touchpad">Touchpad</button></div></div>
+    <div class="row"><label for="tpSens" data-t="tpSens">Touchpad speed</label><input type="range" id="tpSens" min="1" max="5" step="1"></div>
+    <div class="row"><label for="haptics" data-t="haptics">Vibration</label><label class="switch"><input type="checkbox" id="haptics"><span></span></label></div>
+    <div class="row"><label for="token" data-t="tokenThis">Access token</label><input type="password" id="token" autocomplete="off" data-tp="tokenHint"></div>
+  </div>
+  <p class="note" data-t="phoneNote">These settings are saved on this phone only.</p>
+
+  <!-- Saved on the server: config.json -->
+  <h2 data-t="general">Remote (for everyone)</h2>
+  <div class="group">
+    <div class="row"><label for="title" data-t="name">Name</label><input type="text" id="title" maxlength="40" placeholder="TV Remote"></div>
+    <div class="row"><label for="volDev" data-t="volumeTo">Volume goes to</label><select id="volDev"></select></div>
+  </div>
+
+  <h2 data-t="devices">TVs and boxes</h2>
+  <div id="devices"></div>
+  <div class="group">
+    <div class="btnrow">
+      <button class="chip" id="addDev" data-t="addDevice">+ Add device</button>
+      <button class="chip" id="scan" data-t="scan">Search network</button>
+    </div>
+    <div class="picker" id="scanResults" hidden></div>
+  </div>
+  <p class="note" data-t="devNote">After adding a TV, accept "Allow USB debugging?" on the TV screen.</p>
+
+  <h2 data-t="assistants">Voice assistants and smart home</h2>
+  <div class="group">
+    <div class="row"><label for="srvToken" data-t="serverToken">Token (password for the API)</label><input type="text" id="srvToken" autocomplete="off" placeholder="—"></div>
+    <div class="btnrow"><button class="chip" id="genToken" data-t="genToken">Create token</button><button class="chip" id="clearToken" data-t="noToken">No token</button></div>
+    <div class="row"><span class="lbl" data-t="for">For</span>
+      <div class="seg" id="segAsst"><button data-v="siri">Siri</button><button data-v="ha">Home Assistant</button><button data-v="alexa">Alexa</button><button data-v="google">Google</button></div></div>
+    <div class="row"><label for="asstKey" data-t="action">Action</label><select id="asstKey"></select></div>
+    <div><button class="chip copy" id="copyAsst" data-t="copy">Copy</button><pre id="asstOut"></pre></div>
+  </div>
+  <p class="note" id="asstNote"></p>
+
+  <h2 data-t="more">More</h2>
+  <div class="group">
+    <a class="row link" href="/#progress" id="progressLink" style="text-decoration:none"><span class="lbl" data-t="progress">Setup progress</span><span>›</span></a>
+    <a class="row link" href="https://github.com/mangoattack/tv-remote-air#help" target="_blank" rel="noopener" style="text-decoration:none"><span class="lbl" data-t="help">Help</span><span>›</span></a>
+  </div>
+</main>
+
+<div class="save"><div><span class="msg" id="saveMsg"></span><button id="saveBtn" disabled data-t="save">Save</button></div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+};
+const TEXT = {
+  en: { remote: "Remote", settings: "Settings", thisPhone: "On this phone", language: "Language", auto: "Auto", layout: "Layout",
+    classic: "Classic", appletv: "Apple TV", control: "Control", clickpad: "Clickpad", tpSens: "Touchpad speed", haptics: "Vibration",
+    tokenThis: "Access token", tokenHint: "only if the server has one", phoneNote: "These settings are saved on this phone only.",
+    general: "Remote (for everyone)", name: "Name", volumeTo: "Volume goes to", devices: "TVs and boxes", addDevice: "+ Add device",
+    scan: "Search network", scanning: "Searching …", nothingFound: "Nothing found. Is network debugging on, and the TV on the same network?",
+    devNote: "After adding a TV, accept \"Allow USB debugging?\" on the TV screen. Save to apply changes.",
+    assistants: "Voice assistants and smart home", serverToken: "Token", genToken: "Create token", noToken: "No token",
+    for: "For", action: "Action", copy: "Copy", copied: "Copied", more: "More", progress: "Setup progress", help: "Help", save: "Save",
+    saved: "Saved", unsaved: "Unsaved changes", devName: "Name", ip: "IP address", isBox: "Box without HDMI inputs",
+    adbKb: "ADBKeyBoard installed (umlauts)", favourites: "Favourites (quick buttons)", addApp: "+ App", addInput: "+ HDMI input",
+    addKey: "+ Key", test: "Connect", remove: "Remove device", up: "Up", down: "Down", del: "Delete", loading: "Loading …",
+    saveFirst: "Save first, then add favourites.", tvButton: "TV button opens", home: "Home screen", added: "Added",
+    stateDevice: "Connected", stateUnauth: "Accept \"Allow USB debugging?\" on the TV, then press Connect again.",
+    siriNote: "Shortcuts app → + → Get contents of URL → paste the address → name the shortcut, e.g. \"TV pause\". Siri and HomePod run it by name.",
+    haNote: "Put this in configuration.yaml, restart Home Assistant, then call the script from a button or automation.",
+    alexaNote: "Alexa can't call a local address by itself. Use a bridge such as Home Assistant: create the script there, expose it to Alexa, then use it in an Alexa routine.",
+    googleNote: "Android: use the HTTP Shortcuts app or a Tasker \"HTTP Request\" with this address, then start it from a Google Assistant routine.",
+    tokenWarn: "Without a token, anyone on your network can use these addresses." },
+  de: { remote: "Fernbedienung", settings: "Einstellungen", thisPhone: "Auf diesem Handy", language: "Sprache", auto: "Auto", layout: "Aussehen",
+    classic: "Klassisch", appletv: "Apple TV", control: "Steuerung", clickpad: "Steuerkreuz", tpSens: "Touchpad-Tempo", haptics: "Vibration",
+    tokenThis: "Zugangs-Token", tokenHint: "nur wenn der Server eins hat", phoneNote: "Diese Einstellungen gelten nur auf diesem Handy.",
+    general: "Fernbedienung (für alle)", name: "Name", volumeTo: "Lautstärke geht an", devices: "TVs und Boxen", addDevice: "+ Gerät hinzufügen",
+    scan: "Netz durchsuchen", scanning: "Suche …", nothingFound: "Nichts gefunden. Ist Netzwerk-Debugging an und der TV im gleichen Netz?",
+    devNote: "Nach dem Hinzufügen am TV \"USB-Debugging zulassen?\" bestätigen. Mit Speichern werden Änderungen übernommen.",
+    assistants: "Sprachassistenten und Smart Home", serverToken: "Token", genToken: "Token erstellen", noToken: "Kein Token",
+    for: "Für", action: "Aktion", copy: "Kopieren", copied: "Kopiert", more: "Mehr", progress: "Einrichtungs-Fortschritt", help: "Hilfe", save: "Speichern",
+    saved: "Gespeichert", unsaved: "Nicht gespeichert", devName: "Name", ip: "IP-Adresse", isBox: "Box ohne HDMI-Eingänge",
+    adbKb: "ADBKeyBoard installiert (Umlaute)", favourites: "Favoriten (Schnelltasten)", addApp: "+ App", addInput: "+ HDMI-Eingang",
+    addKey: "+ Taste", test: "Verbinden", remove: "Gerät entfernen", up: "Hoch", down: "Runter", del: "Löschen", loading: "Lade …",
+    saveFirst: "Zuerst speichern, dann Favoriten hinzufügen.", tvButton: "TV-Taste öffnet", home: "Startbildschirm", added: "Hinzugefügt",
+    stateDevice: "Verbunden", stateUnauth: "Am TV \"USB-Debugging zulassen?\" bestätigen, dann nochmals Verbinden drücken.",
+    siriNote: "Kurzbefehle-App → + → Inhalte von URL abrufen → Adresse einfügen → Kurzbefehl benennen, z. B. \"TV Pause\". Siri und HomePod starten ihn beim Namen.",
+    haNote: "In configuration.yaml einfügen, Home Assistant neu starten, dann das Skript von einem Knopf oder einer Automation aufrufen.",
+    alexaNote: "Alexa kann keine lokale Adresse selbst aufrufen. Nimm eine Brücke wie Home Assistant: dort das Skript anlegen, für Alexa freigeben und in einer Alexa-Routine nutzen.",
+    googleNote: "Android: die App HTTP Shortcuts oder eine Tasker-\"HTTP Request\" mit dieser Adresse nutzen und aus einer Google Assistant-Routine starten.",
+    tokenWarn: "Ohne Token kann jeder in deinem Netz diese Adressen nutzen." },
+};
+const lang = () => { const l = store.get("lang", "auto"); return l !== "auto" ? l : (navigator.language || "en").startsWith("de") ? "de" : "en"; };
+const t = (k) => TEXT[lang()][k] ?? TEXT.en[k] ?? k;
+function translate() {
+  document.documentElement.lang = lang();
+  document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t));
+  document.querySelectorAll("[data-tp]").forEach(e => e.placeholder = t(e.dataset.tp));
+}
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const ICON = {
+  up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 5-5 5 5"/></svg>',
+  down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 5 5 5-5"/></svg>',
+  del: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+};
+
+async function api(path, body) {
+  const headers = { "X-Token": store.get("token", "") };
+  const opts = body === undefined ? { headers } :
+    { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch("/api/" + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || "Error");
+  return data;
+}
+
+// ---------------------------------------------------------------- this phone
+function seg(id, key, def, after) {
+  const box = $(id);
+  const paint = () => box.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === store.get(key, def)));
+  box.querySelectorAll("button").forEach(b => b.onclick = () => { store.set(key, b.dataset.v); paint(); after && after(); });
+  paint();
+}
+seg("segLang", "lang", "auto", () => { translate(); renderDevices(); renderAssistant(); });
+seg("segLayout", "layout", "classic");
+seg("segMode", "mode", "pad");
+$("tpSens").value = store.get("tpSens", "3"); $("tpSens").oninput = () => store.set("tpSens", $("tpSens").value);
+$("haptics").checked = store.get("haptics", "1") === "1"; $("haptics").onchange = () => store.set("haptics", $("haptics").checked ? "1" : "0");
+$("token").value = store.get("token", ""); $("token").onchange = () => { store.set("token", $("token").value); load(); };
+
+// ---------------------------------------------------------------- server config
+let cfg = null, dirty = false;
+function changed() { dirty = true; $("saveBtn").disabled = false; $("saveMsg").textContent = t("unsaved"); }
+
+function renderGeneral() {
+  $("title").value = cfg.title || "";
+  $("title").oninput = () => { cfg.title = $("title").value; changed(); };
+  const v = $("volDev"); v.replaceChildren(...Object.entries(cfg.devices).map(([id, d]) => { const o = el("option", "", d.name || id); o.value = id; return o; }));
+  v.value = cfg.volumeDevice; v.onchange = () => { cfg.volumeDevice = v.value; changed(); };
+  $("srvToken").value = cfg.token || "";
+  $("srvToken").oninput = () => { cfg.token = $("srvToken").value.trim(); changed(); renderAssistant(); };
+}
+
+function row(labelText, input) { const r = el("div", "row"); const l = el("label", "", labelText); r.append(l, input); return r; }
+function textInput(value, placeholder, onInput) {
+  const i = el("input"); i.type = "text"; i.value = value || ""; i.placeholder = placeholder || ""; i.autocomplete = "off";
+  i.setAttribute("autocapitalize", "off"); i.spellcheck = false; i.oninput = () => onInput(i.value.trim()); return i;
+}
+function switchInput(checked, onChange) {
+  const w = el("label", "switch"); const i = el("input"); i.type = "checkbox"; i.checked = !!checked;
+  i.onchange = () => onChange(i.checked); w.append(i, el("span")); return w;
+}
+
+function renderDevices() {
+  if (!cfg) return;
+  const wrap = $("devices"); wrap.replaceChildren();
+  Object.entries(cfg.devices).forEach(([id, d]) => {
+    const card = el("div", "dev");
+    const head = el("div", "devhead"); const dot = el("span", "dot"); dot.id = "dot-" + id;
+    head.append(dot, el("span", "grow", d.name || id));
+    const test = el("button", "chip", t("test"));
+    test.onclick = async () => {
+      test.textContent = "…";
+      try { const s = (await api("admin/connect", { host: d.host })).state;
+        dot.className = "dot " + (s === "device" ? "ok" : "bad");
+        $("saveMsg").textContent = s === "device" ? t("stateDevice") : s.includes("unauthorized") ? t("stateUnauth") : s;
+      } catch (e) { dot.className = "dot bad"; $("saveMsg").textContent = e.message; }
+      test.textContent = t("test");
+    };
+    head.append(test); card.append(head);
+    card.append(row(t("devName"), textInput(d.name, id, v => { d.name = v; changed(); head.children[1].textContent = v || id; renderGeneral(); })));
+    card.append(row(t("ip"), textInput(d.host, "192.168.0.50", v => { d.host = v; changed(); })));
+    card.append(row(t("isBox"), switchInput(d.box, v => { d.box = v; changed(); })));
+    card.append(row(t("adbKb"), switchInput(d.adbKeyboard, v => { d.adbKeyboard = v; changed(); })));
+
+    // Favourites: reorder, rename, delete, add from the device's real apps and inputs.
+    const favs = el("div"); favs.append(el("h2", "", t("favourites")));
+    favs.firstChild.style.margin = "12px 16px 4px";
+    (d.shortcuts = d.shortcuts || []).forEach((s, i) => {
+      const f = el("div", "fav"); const lbl = el("div", "lbl");
+      const name = el("input"); name.value = s.label || ""; name.oninput = () => { s.label = name.value; changed(); };
+      lbl.append(name, el("small", "", s.input ? "HDMI · " + s.input : s.app ? s.app : t("addKey").slice(2) + " · " + s.key));
+      const mk = (svg, title, fn) => { const b = el("button", "icon"); b.innerHTML = svg; b.title = title; b.onclick = fn; return b; };
+      f.append(lbl,
+        mk(ICON.up, t("up"), () => { if (i) { [d.shortcuts[i - 1], d.shortcuts[i]] = [d.shortcuts[i], d.shortcuts[i - 1]]; changed(); renderDevices(); } }),
+        mk(ICON.down, t("down"), () => { if (i < d.shortcuts.length - 1) { [d.shortcuts[i + 1], d.shortcuts[i]] = [d.shortcuts[i], d.shortcuts[i + 1]]; changed(); renderDevices(); } }),
+        mk(ICON.del, t("del"), () => { d.shortcuts.splice(i, 1); changed(); renderDevices(); }));
+      favs.append(f);
+    });
+    const btns = el("div", "btnrow"); const picker = el("div", "picker"); picker.hidden = true;
+    const pick = async (kind) => {
+      if (!saved.has(id)) { $("saveMsg").textContent = t("saveFirst"); return; }
+      picker.hidden = false; picker.replaceChildren(el("div", "row", t("loading")));
+      try {
+        const items = kind === "key"
+          ? ["home", "playpause", "search", "settings", "recents", "input", "guide"].map(k => ({ id: k, name: k }))
+          : await api(id + "/" + (kind === "app" ? "apps" : "inputs"));
+        picker.replaceChildren(...items.map(it => {
+          const b = el("button"); b.append(el("span", "", it.name), el("small", "", "+"));
+          b.onclick = () => {
+            const icon = kind === "input" ? "hdmi" : /browser|bro/i.test(it.name) ? "web" : /airplay/i.test(it.name) ? "airplay" : "star";
+            d.shortcuts.push({ label: it.name.slice(0, 14), icon, [kind]: it.id }); picker.hidden = true; changed(); renderDevices();
+          };
+          return b;
+        }));
+        if (!items.length) picker.replaceChildren(el("div", "row", "—"));
+      } catch (e) { picker.replaceChildren(el("div", "row", e.message)); }
+    };
+    const add = (label, kind) => { const b = el("button", "chip", label); b.onclick = () => pick(kind); btns.append(b); };
+    if (d.shortcuts.length < 6) { add(t("addApp"), "app"); if (!d.box) add(t("addInput"), "input"); add(t("addKey"), "key"); }
+    favs.append(btns, picker); card.append(favs);
+
+    const rm = el("div", "btnrow"); const rb = el("button", "chip danger", t("remove"));
+    rb.onclick = () => { if (Object.keys(cfg.devices).length > 1) { delete cfg.devices[id]; changed(); renderDevices(); renderGeneral(); } };
+    rm.append(rb); card.append(rm);
+    wrap.append(card);
+  });
+}
+
+function newId(base) { let id = base, n = 2; while (cfg.devices[id]) id = base + n++; return id; }
+$("addDev").onclick = () => { const id = newId(Object.keys(cfg.devices).length ? "box" : "tv"); cfg.devices[id] = { name: id.toUpperCase(), host: "", shortcuts: [] }; changed(); renderDevices(); renderGeneral(); };
+$("scan").onclick = async () => {
+  const out = $("scanResults"); out.hidden = false; out.replaceChildren(el("div", "row", t("scanning")));
+  try {
+    const found = await api("admin/scan");
+    const known = new Set(Object.values(cfg.devices).map(d => d.host.split(":")[0]));
+    out.replaceChildren(...found.map(f => {
+      const b = el("button"); b.append(el("span", "", f.host + (f.name ? " · " + f.name : "")), el("small", "", known.has(f.host) ? "✓" : "+"));
+      b.onclick = () => { if (known.has(f.host)) return; const id = newId(Object.keys(cfg.devices).length ? "box" : "tv");
+        cfg.devices[id] = { name: f.name || id.toUpperCase(), host: f.host, shortcuts: [] }; changed(); renderDevices(); renderGeneral(); out.hidden = true; };
+      return b;
+    }));
+    if (!found.length) out.replaceChildren(el("div", "row", t("nothingFound")));
+  } catch (e) { out.replaceChildren(el("div", "row", e.message)); }
+};
+
+// ---------------------------------------------------------------- assistants
+const KEYS = ["power", "on", "off", "playpause", "pause", "stop", "volup", "voldown", "mute", "home", "back", "search"];
+seg("segAsst", "asst", "siri", () => renderAssistant());
+function renderAssistant() {
+  if (!cfg) return;
+  const sel = $("asstKey"), prev = sel.value;
+  const opts = [];
+  Object.entries(cfg.devices).forEach(([id, d]) => {
+    KEYS.forEach(k => opts.push([`${id}|key|${k}`, `${d.name || id}: ${k}`]));
+    (d.shortcuts || []).forEach((s, i) => opts.push([`${id}|shortcut|${i}`, `${d.name || id}: ${s.label}`]));
+  });
+  sel.replaceChildren(...opts.map(([v, n]) => { const o = el("option", "", n); o.value = v; return o; }));
+  sel.value = opts.some(o => o[0] === prev) ? prev : opts[0][0];
+  sel.onchange = renderAssistant;
+  const [dev, kind, what] = sel.value.split("|");
+  const base = location.origin, tok = cfg.token ? `?token=${encodeURIComponent(cfg.token)}` : "";
+  const which = store.get("asst", "siri");
+  let out, note;
+  if (kind === "key") {
+    const url = `${base}/api/${dev}/key/${what}${tok}`;
+    out = which === "ha" ? `rest_command:\n  tv_${dev}_${what}:\n    url: "${url}"\n    method: GET` : url;
+  } else {
+    const url = `${base}/api/${dev}/shortcut${tok}`;
+    out = which === "ha"
+      ? `rest_command:\n  tv_${dev}_fav${what}:\n    url: "${url}"\n    method: POST\n    content_type: "application/json"\n    payload: '{"index": ${what}}'`
+      : `POST ${url}\nContent-Type: application/json\n\n{"index": ${what}}`;
+  }
+  note = { siri: t("siriNote"), ha: t("haNote"), alexa: t("alexaNote"), google: t("googleNote") }[which];
+  if (!cfg.token) note += " " + t("tokenWarn");
+  $("asstOut").textContent = out; $("asstNote").textContent = note;
+}
+$("copyAsst").onclick = async () => { try { await navigator.clipboard.writeText($("asstOut").textContent); $("copyAsst").textContent = t("copied"); setTimeout(() => $("copyAsst").textContent = t("copy"), 1500); } catch {} };
+$("genToken").onclick = () => { const a = new Uint8Array(12); crypto.getRandomValues(a); cfg.token = Array.from(a, b => b.toString(16).padStart(2, "0")).join(""); $("srvToken").value = cfg.token; changed(); renderAssistant(); };
+$("clearToken").onclick = () => { cfg.token = ""; $("srvToken").value = ""; changed(); renderAssistant(); };
+
+// ---------------------------------------------------------------- load and save
+let saved = new Set();
+async function load() {
+  try {
+    cfg = await api("admin/config");
+    saved = new Set(Object.keys(cfg.devices));
+    renderGeneral(); renderDevices(); renderAssistant();
+    $("saveMsg").textContent = "";
+    Object.keys(cfg.devices).forEach(async id => {
+      try { const s = await api(id + "/status"); const dot = $("dot-" + id); if (dot) dot.className = "dot " + (s.online ? "ok" : "bad"); } catch {}
+    });
+  } catch (e) { $("saveMsg").textContent = e.message; }
+}
+$("saveBtn").onclick = async () => {
+  $("saveBtn").disabled = true;
+  try {
+    const newToken = cfg.token || "";
+    cfg = await api("admin/config", cfg);
+    store.set("token", newToken); $("token").value = newToken;   // this phone keeps working after a token change
+    saved = new Set(Object.keys(cfg.devices)); dirty = false;
+    $("saveMsg").textContent = t("saved"); renderGeneral(); renderDevices(); renderAssistant();
+  } catch (e) { $("saveMsg").textContent = e.message; $("saveBtn").disabled = false; }
+};
+window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+translate(); load();
+</script>
+</body>
+</html>

@@ -20,4 +20,6 @@ Open an issue with:
 
 ## Prompt
 
-`PROMPT.md` (English) and `PROMPT.de.md` (German) are the same prompt. Change both, and keep the README copies in sync.
+`PROMPT.md` (English) and `PROMPT.de.md` (German) are the same prompt. Change both, then run `python3 tools/check-readme.py --fix` to update the copies in the READMEs. CI fails if they differ.
+
+Read [AGENTS.md](AGENTS.md) for the full rules (written for AI agents, but the best overview for people too).

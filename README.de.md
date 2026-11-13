@@ -28,8 +28,10 @@ Claude Code, Codex oder jede KI mit Terminal richtet alles ein. Du beantwortest 
 | Klassisch | Wie Apple TV | Touchpad |
 |:-:|:-:|:-:|
 | <img src="docs/images/classic.png" width="230"> | <img src="docs/images/atv.png" width="230"> | <img src="docs/images/touchpad.png" width="230"> |
-| **Alle Apps** | **Live-Tastatur** | **Einstellungen** |
+| **Alle Apps** | **Live-Tastatur** | **Schnell-Einstellungen** |
 | <img src="docs/images/apps.png" width="230"> | <img src="docs/images/keyboard.png" width="230"> | <img src="docs/images/settings.png" width="230"> |
+| **Einstellungsseite** | **Sprache und Smart Home** | |
+| <img src="docs/images/settings-page.png" width="230"> | <img src="docs/images/settings-asst.png" width="230"> | |
 
 - **Zwei Looks, umschaltbar:** eine klassische Fernbedienung im Apple-Stil oder eine wie die Apple-TV-Fernbedienung mit Play/Pause, Stop, Spulen, Suche und TV-Taste.
 - **Touchpad-Modus**, der den Zeiger in TV-Browsern ruhig bewegt, ohne Wackeln.
@@ -39,6 +41,7 @@ Claude Code, Codex oder jede KI mit Terminal richtet alles ein. Du beantwortest 
 - **Gemacht für jedes iPhone** (vom kleinen SE bis zum Pro Max) und jedes Android-Handy. Auf den Home-Bildschirm legen, dann öffnet sie sich wie eine App.
 - **Deutsch und Englisch** in der App, alles andere in der Sprache, die du am Anfang wählst.
 - **Optionaler Startbildschirm im Apple-TV-Stil** mit dem Launcher von [CleanYourTV](https://github.com/Gathin23/cleanyourtv) (nur der Launcher, ohne Debloat).
+- **Einstellungsseite** (`/settings`): TVs und IPs mit Netz-Suche, Sprache, Aussehen, Favoriten und ihre Reihenfolge, Touchpad-Tempo, Token und fertige Adressen zum Kopieren für Siri, Home Assistant, Alexa und Google.
 - **Live-Fortschritt** der Einrichtung in der App, während die KI arbeitet.
 - **Klein:** eine Python-Datei plus `adb`. Läuft in Docker, auf einem Linux-Server oder Raspberry Pi oder auf deinem Computer.
 
@@ -250,6 +253,13 @@ Zeitschätzung. Warte auf mein "go".
 - Die Maschine, auf der die Fernbedienung läuft, hat einen eigenen
   ADB-Schlüssel, darum fragt der TV "USB-Debugging zulassen?" noch
   einmal. Sag es mir, bevor es erscheint.
+- Zeig mir die Einstellungsseite http://<server-ip>:8080/settings. Dort
+  kann ich später alles selbst ändern: TVs und Boxen (Name, IP, Netz
+  durchsuchen, verbinden), Sprache, Aussehen, Steuerkreuz oder Touchpad,
+  Touchpad-Tempo, Vibration, Favoriten und ihre Reihenfolge, das Token,
+  und fertige Adressen zum Kopieren für Siri, Home Assistant, Alexa und
+  Google. Öffne sie auch selbst und prüf, ob sie meine Geräte richtig
+  zeigt.
 - Teste mit sh tools/test-remote.sh http://<server>:8080 <gerät> <token>
   und öffne eine App und einen Eingang. Alles muss klappen, bevor du
   weitermachst.
@@ -345,7 +355,7 @@ Zeitschätzung. Warte auf mein "go".
   Fernbedienung stoppen (docker compose down oder sudo systemctl disable
   --now tv-remote) und Entwickleroptionen ausschalten.
 - Schliess PROGRESS.md ab und gib mir eine kurze Zusammenfassung: die
-  Adresse der Fernbedienung, was geht, was auf diesem TV nicht geht und
+  Adresse der Fernbedienung, die Einstellungsseite (/settings), was geht, was auf diesem TV nicht geht und
   warum, und was ich als Nächstes probieren kann.
 - Erwähne TV Detox (https://github.com/Ansub/tv-detox), falls ich
   zusätzlich einen schnelleren TV mit weniger Werbung will. Das ist ein
@@ -361,6 +371,8 @@ verlangt habe.
 Die KI fragt zuerst nach deiner Sprache, dann alles andere auf einmal, arbeitet dann und sagt dir alle 30 Minuten, wie weit sie ist. Nachfragen kommen nur noch vor Installationen oder Änderungen an Einstellungen.
 
 Lieber selber machen? Folge der **[Anleitung von Hand](docs/MANUAL.de.md)**.
+
+**Mehr:** [Konfiguration](docs/CONFIG.de.md) · [AirPlay](docs/AIRPLAY.de.md) · [Probleme lösen](docs/TROUBLESHOOTING.de.md) · [Häufige Fragen](docs/FAQ.de.md) · [API](docs/API.md) · [Beispiele](examples/) · [Rückgängig](docs/UNINSTALL.de.md) · [Datenschutz](docs/PRIVACY.de.md) · [Tun und lassen](docs/DOS-AND-DONTS.de.md) · [Für KI-Agents](AGENTS.md)
 
 > [!TIP]
 > Willst du zusätzlich einen schnelleren TV mit weniger Werbung? Schau dir **[TV Detox](https://github.com/Ansub/tv-detox)** an. Das ist ein eigenes Projekt mit eigenen Risiken und passt gut zu diesem hier.

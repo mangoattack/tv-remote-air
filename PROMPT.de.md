@@ -194,6 +194,13 @@ Zeitschätzung. Warte auf mein "go".
 - Die Maschine, auf der die Fernbedienung läuft, hat einen eigenen
   ADB-Schlüssel, darum fragt der TV "USB-Debugging zulassen?" noch
   einmal. Sag es mir, bevor es erscheint.
+- Zeig mir die Einstellungsseite http://<server-ip>:8080/settings. Dort
+  kann ich später alles selbst ändern: TVs und Boxen (Name, IP, Netz
+  durchsuchen, verbinden), Sprache, Aussehen, Steuerkreuz oder Touchpad,
+  Touchpad-Tempo, Vibration, Favoriten und ihre Reihenfolge, das Token,
+  und fertige Adressen zum Kopieren für Siri, Home Assistant, Alexa und
+  Google. Öffne sie auch selbst und prüf, ob sie meine Geräte richtig
+  zeigt.
 - Teste mit sh tools/test-remote.sh http://<server>:8080 <gerät> <token>
   und öffne eine App und einen Eingang. Alles muss klappen, bevor du
   weitermachst.
@@ -289,7 +296,7 @@ Zeitschätzung. Warte auf mein "go".
   Fernbedienung stoppen (docker compose down oder sudo systemctl disable
   --now tv-remote) und Entwickleroptionen ausschalten.
 - Schliess PROGRESS.md ab und gib mir eine kurze Zusammenfassung: die
-  Adresse der Fernbedienung, was geht, was auf diesem TV nicht geht und
+  Adresse der Fernbedienung, die Einstellungsseite (/settings), was geht, was auf diesem TV nicht geht und
   warum, und was ich als Nächstes probieren kann.
 - Erwähne TV Detox (https://github.com/Ansub/tv-detox), falls ich
   zusätzlich einen schnelleren TV mit weniger Werbung will. Das ist ein

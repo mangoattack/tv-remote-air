@@ -117,7 +117,7 @@ Open `http://<ip-of-that-machine>:8080` on your phone. Try a button. If the dots
 - **iPhone:** open the address in **Safari** → Share button → **Add to Home Screen**. It then opens full screen like an app.
 - **Android:** open it in **Chrome** → ⋮ → **Add to Home screen** (or **Install app**).
 
-In the app, tap the sliders icon for **Settings**: layout (Classic or Apple TV style), clickpad or touchpad, language, token.
+In the app, tap the sliders icon for quick **Settings** (layout, control, language, token). **All settings** opens `/settings`: devices and IPs with network search, favourites and their order, touchpad speed, vibration, token and addresses for voice assistants. See [CONFIG.md](CONFIG.md).
 
 ## 6. AirPlay
 

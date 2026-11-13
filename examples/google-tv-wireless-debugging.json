@@ -1,0 +1,16 @@
+{
+  "title": "TV Remote",
+  "port": 8080,
+  "token": "",
+  "volumeDevice": "tv",
+  "devices": {
+    "tv": {
+      "name": "Google TV",
+      "host": "192.168.0.50:5555",
+      "adbKeyboard": true,
+      "shortcuts": [
+        { "label": "AirPlay", "icon": "airplay", "app": "io.github.jqssun.airplay" }
+      ]
+    }
+  }
+}

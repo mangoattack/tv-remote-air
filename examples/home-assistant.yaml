@@ -1,0 +1,47 @@
+# Home Assistant: buttons for TV Remote Air.
+# Put this in configuration.yaml, replace <server> and <token>, restart Home Assistant.
+# The settings page (/settings → Voice assistants → Home Assistant) prints these lines for you.
+
+rest_command:
+  tv_key:
+    url: "http://<server>:8080/api/{{ device | default('tv') }}/key/{{ key }}?token=<token>"
+    method: GET
+  tv_app:
+    url: "http://<server>:8080/api/{{ device | default('tv') }}/app?token=<token>"
+    method: POST
+    content_type: "application/json"
+    payload: '{"id": "{{ app }}"}'
+  tv_favourite:
+    url: "http://<server>:8080/api/{{ device | default('tv') }}/shortcut?token=<token>"
+    method: POST
+    content_type: "application/json"
+    payload: '{"index": {{ index }}}'
+
+script:
+  tv_off:
+    alias: "TV off"
+    sequence:
+      - action: rest_command.tv_key
+        data: { key: "off" }
+  tv_pause:
+    alias: "TV pause"
+    sequence:
+      - action: rest_command.tv_key
+        data: { key: "playpause" }
+  tv_netflix:
+    alias: "TV Netflix"
+    sequence:
+      - action: rest_command.tv_app
+        data: { app: "com.netflix.ninja" }
+  tv_box:
+    alias: "TV to the box"
+    sequence:
+      - action: rest_command.tv_favourite
+        data: { index: 0 }
+
+# Dashboard card (Edit dashboard → Add card → Manual):
+# type: grid
+# cards:
+#   - { type: button, name: Off, icon: mdi:power, tap_action: { action: perform-action, perform_action: script.tv_off } }
+#   - { type: button, name: Pause, icon: mdi:play-pause, tap_action: { action: perform-action, perform_action: script.tv_pause } }
+#   - { type: button, name: Netflix, icon: mdi:netflix, tap_action: { action: perform-action, perform_action: script.tv_netflix } }

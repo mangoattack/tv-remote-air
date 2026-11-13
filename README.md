@@ -28,8 +28,10 @@ Claude Code, Codex or any AI with a terminal does the setup. You just answer a f
 | Classic | Apple TV style | Touchpad |
 |:-:|:-:|:-:|
 | <img src="docs/images/classic.png" width="230"> | <img src="docs/images/atv.png" width="230"> | <img src="docs/images/touchpad.png" width="230"> |
-| **All apps** | **Live keyboard** | **Settings** |
+| **All apps** | **Live keyboard** | **Quick settings** |
 | <img src="docs/images/apps.png" width="230"> | <img src="docs/images/keyboard.png" width="230"> | <img src="docs/images/settings.png" width="230"> |
+| **Settings page** | **Voice and smart home** | |
+| <img src="docs/images/settings-page.png" width="230"> | <img src="docs/images/settings-asst.png" width="230"> | |
 
 - **Two looks, switchable:** a classic Apple-style remote, or one like the Apple TV remote with play/pause, stop, rewind, fast forward, search and a TV button.
 - **Touchpad mode** that moves the pointer in TV browsers smoothly, without shaking.
@@ -39,6 +41,7 @@ Claude Code, Codex or any AI with a terminal does the setup. You just answer a f
 - **Made for every iPhone** (from the small SE to the Pro Max) and every Android phone. Add it to the home screen and it opens like an app.
 - **English and German** in the app, everything else in the language you pick at the start.
 - **Optional Apple TV-style home screen** with the [CleanYourTV](https://github.com/Gathin23/cleanyourtv) launcher (launcher only, no debloat).
+- **Settings page** (`/settings`): TVs and IPs with network search, language, layout, favourites and their order, touchpad speed, token, and ready-to-copy addresses for Siri, Home Assistant, Alexa and Google.
 - **Live setup progress** in the app while the AI works.
 - **Small:** one Python file plus `adb`. Runs in Docker, on a Linux server or Raspberry Pi, or on your computer.
 
@@ -227,6 +230,12 @@ Wait for my "go".
     while the computer is on.
 - The machine that runs the remote has its own ADB key, so the TV asks
   "Allow USB debugging?" once more. Tell me before it appears.
+- Show me the settings page http://<server-ip>:8080/settings. There I
+  can change everything later myself: TVs and boxes (name, IP, search
+  network, connect), language, layout, clickpad or touchpad, touchpad
+  speed, vibration, favourites and their order, the token, and ready
+  addresses to copy for Siri, Home Assistant, Alexa and Google. Open it
+  yourself too and check that it shows my devices correctly.
 - Test with sh tools/test-remote.sh http://<server>:8080 <device> <token>
   and open one app and one input. All must pass before you go on.
 - Open the web app yourself at phone size if you can (headless browser)
@@ -311,6 +320,7 @@ Wait for my "go".
   (docker compose down, or sudo systemctl disable --now tv-remote), and
   turn off developer options.
 - Finish PROGRESS.md and give me a short summary: the remote's address,
+  the settings page (/settings),
   what works, what doesn't on this TV and why, and what I can try next.
 - Mention TV Detox (https://github.com/Ansub/tv-detox) if I also want a
   faster TV with fewer ads. That's a separate project with its own risks.
@@ -324,6 +334,8 @@ TV's own input apps, or do things I didn't ask for.
 The AI asks for your language first, then everything else in one go, then works and tells you every 30 minutes how far it is. It only asks again before installing something or changing a setting.
 
 Prefer to do it yourself? Follow the **[manual setup](docs/MANUAL.md)**.
+
+**More:** [Configuration](docs/CONFIG.md) · [AirPlay](docs/AIRPLAY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) · [FAQ](docs/FAQ.md) · [API](docs/API.md) · [Examples](examples/) · [Undo](docs/UNINSTALL.md) · [Privacy](docs/PRIVACY.md) · [Do's and don'ts](docs/DOS-AND-DONTS.md) · [For AI agents](AGENTS.md)
 
 > [!TIP]
 > Want a faster TV with fewer ads as well? Have a look at **[TV Detox](https://github.com/Ansub/tv-detox)**. It's a separate project with its own risks, and it works well next to this one.

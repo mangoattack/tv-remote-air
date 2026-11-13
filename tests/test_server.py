@@ -62,6 +62,14 @@ class Parsing(unittest.TestCase):
         with self.assertRaises(server.DeviceError):
             self.dev.set_input("x y")
 
+    def test_examples_are_valid(self):
+        folder = os.path.join(ROOT, "examples")
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                with self.subTest(name):
+                    server.validate_config(json.load(open(os.path.join(folder, name))))
+        server.validate_config(json.load(open(os.path.join(REMOTE, "config.example.json"))))
+
 
 class Http(unittest.TestCase):
     @classmethod
@@ -117,6 +125,30 @@ class Http(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertIn(b"TV Remote", body)
         self.assertEqual(self.req("/manifest.webmanifest")[0], 200)
+
+    def test_settings_page_and_admin_config(self):
+        self.assertEqual(self.req("/settings")[0], 200)
+        code, body = self.req("/api/admin/config")
+        cfg = json.loads(body)
+        self.assertEqual(code, 200)
+        cfg["title"] = "Living room"
+        cfg["devices"]["tv"]["shortcuts"].reverse()
+        code, body = self.req("/api/admin/config", cfg)
+        self.assertEqual(code, 200, body)
+        self.assertEqual(json.loads(self.req("/api/config")[1])["title"], "Living room")
+        self.assertEqual(json.loads(self.req("/api/config")[1])["devices"][0]["shortcuts"][0]["label"], "AirPlay")
+
+    def test_admin_config_rejects_bad_input(self):
+        good = json.loads(self.req("/api/admin/config")[1])
+        bad = json.loads(json.dumps(good)); bad["devices"]["tv"]["host"] = "1.2.3.4; reboot"
+        self.assertEqual(self.req("/api/admin/config", bad)[0], 502)
+        self.assertEqual(self.req("/api/admin/config", {"devices": {}})[0], 502)
+        bad = json.loads(json.dumps(good)); bad["devices"]["Bad Id!"] = {"host": "10.0.0.9"}
+        self.assertEqual(self.req("/api/admin/config", bad)[0], 502)
+
+    def test_scan_and_connect(self):
+        self.assertEqual(len(json.loads(self.req("/api/admin/scan")[1])), 2)
+        self.assertEqual(json.loads(self.req("/api/admin/connect", {"host": "10.0.0.5"})[1])["state"], "device")
 
 
 if __name__ == "__main__":

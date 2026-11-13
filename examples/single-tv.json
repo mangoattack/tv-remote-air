@@ -1,0 +1,17 @@
+{
+  "title": "TV Remote",
+  "port": 8080,
+  "token": "",
+  "volumeDevice": "tv",
+  "devices": {
+    "tv": {
+      "name": "TV",
+      "host": "192.168.0.50",
+      "shortcuts": [
+        { "label": "Netflix", "icon": "star", "app": "com.netflix.ninja" },
+        { "label": "YouTube", "icon": "star", "app": "com.google.android.youtube.tv" },
+        { "label": "AirPlay", "icon": "airplay", "app": "io.github.jqssun.airplay" }
+      ]
+    }
+  }
+}

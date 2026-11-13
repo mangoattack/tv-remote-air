@@ -7,10 +7,13 @@ Only the Python standard library and the `adb` command are needed. Devices live 
     python3 server.py              # uses config.json next to this file
     python3 server.py --demo       # fake devices, for screenshots and UI work
 """
+import concurrent.futures
+import ipaddress
 import json
 import os
 import re
 import shlex
+import socket
 import subprocess
 import sys
 import threading
@@ -273,7 +276,121 @@ class DemoDevice(AdbDevice):
         return {"online": True, "power": True}
 
 
-DEVICES = {dev_id: (DemoDevice if DEMO else AdbDevice)(dev_id, cfg) for dev_id, cfg in CONFIG["devices"].items()}
+DEVICES = {}
+
+
+def load_devices():
+    """(Re)builds the device objects from CONFIG, e.g. after the settings page saved a change."""
+    DEVICES.clear()
+    for dev_id, cfg in CONFIG["devices"].items():
+        DEVICES[dev_id] = (DemoDevice if DEMO else AdbDevice)(dev_id, cfg)
+
+
+load_devices()
+
+
+# --------------------------------------------------------------------------- settings page backend
+
+ID_RE = re.compile(r"[a-z0-9_-]{1,32}")
+HOST_RE = re.compile(r"[A-Za-z0-9.-]{1,253}(:\d{1,5})?")
+SHORTCUT_KEYS = {"label", "icon", "app", "input", "key", "device"}
+
+
+def validate_config(new):
+    """Checks a config from the settings page; returns a clean copy or raises DeviceError."""
+    if not isinstance(new, dict) or not isinstance(new.get("devices"), dict) or not new["devices"]:
+        raise DeviceError("At least one device is needed")
+    out = {"title": str(new.get("title") or "TV Remote")[:40],
+           "port": int(new.get("port") or CONFIG.get("port", 8080)),
+           "token": str(new.get("token") or "")[:64],
+           "volumeDevice": str(new.get("volumeDevice") or ""),
+           "devices": {}}
+    for dev_id, d in list(new["devices"].items())[:8]:
+        if not ID_RE.fullmatch(dev_id) or not isinstance(d, dict):
+            raise DeviceError(f"Invalid device id {dev_id!r} (a-z, 0-9, - and _ only)")
+        host = str(d.get("host", "")).strip()
+        if not HOST_RE.fullmatch(host):
+            raise DeviceError(f"Invalid IP or host for {dev_id}")
+        dev = {"name": str(d.get("name") or dev_id)[:30], "host": host}
+        if not ":" in host and d.get("port"):
+            dev["port"] = int(d["port"])
+        for flag in ("box", "adbKeyboard"):
+            if d.get(flag):
+                dev[flag] = True
+        for key in ("names", "inputNames"):
+            if isinstance(d.get(key), dict):
+                dev[key] = {str(k)[:200]: str(v)[:40] for k, v in d[key].items()}
+        if isinstance(d.get("hideApps"), list):
+            dev["hideApps"] = [str(x)[:200] for x in d["hideApps"]][:100]
+        if isinstance(d.get("tvButton"), dict):
+            dev["tvButton"] = {k: str(v)[:200] for k, v in d["tvButton"].items() if k in SHORTCUT_KEYS}
+        shortcuts = []
+        for s in (d.get("shortcuts") or [])[:6]:
+            if isinstance(s, dict) and ({"app", "input", "key"} & set(s)):
+                shortcuts.append({k: str(v)[:200] for k, v in s.items() if k in SHORTCUT_KEYS})
+        dev["shortcuts"] = shortcuts
+        out["devices"][dev_id] = dev
+    if out["volumeDevice"] not in out["devices"]:
+        out["volumeDevice"] = next(iter(out["devices"]))
+    return out
+
+
+def save_config(new):
+    global CONFIG
+    clean = validate_config(new)
+    if not DEMO:                    # demo mode keeps changes in memory only
+        text = json.dumps(clean, indent=2, ensure_ascii=False) + "\n"
+        tmp = CONFIG_PATH + ".tmp"
+        try:
+            with open(tmp, "w", encoding="utf-8") as f:
+                f.write(text)
+            os.replace(tmp, CONFIG_PATH)
+        except OSError:
+            # A single bind-mounted file (Docker) can't be replaced, only rewritten.
+            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                f.write(text)
+    CONFIG = clean
+    load_devices()
+    if not DEMO:
+        for d in DEVICES.values():
+            threading.Thread(target=d.connect, daemon=True).start()
+    return clean
+
+
+def scan_network():
+    """Hosts on the server's /24 network with network debugging (port 5555) open."""
+    if DEMO:
+        return [{"host": "192.168.0.50", "name": "Demo TV"}, {"host": "192.168.0.51", "name": "Demo box"}]
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("192.0.2.1", 9))            # TEST-NET address; nothing is sent
+        net = ipaddress.ip_network(s.getsockname()[0] + "/24", strict=False)
+    finally:
+        s.close()
+
+    def probe(ip):
+        try:
+            with socket.create_connection((str(ip), 5555), timeout=0.5):
+                return str(ip)
+        except OSError:
+            return None
+
+    with concurrent.futures.ThreadPoolExecutor(64) as pool:
+        found = [ip for ip in pool.map(probe, net.hosts()) if ip]
+    known = {d.serial.split(":")[0]: d.name for d in DEVICES.values()}
+    return [{"host": ip, "name": known.get(ip, "")} for ip in found]
+
+
+def connect_host(host):
+    """adb connect once, so the TV shows "Allow USB debugging?"; returns the adb state."""
+    if not HOST_RE.fullmatch(host):
+        raise DeviceError("Invalid IP or host")
+    if DEMO:
+        return "device"
+    serial = host if ":" in host else host + ":5555"
+    subprocess.run(["adb", "connect", serial], capture_output=True, timeout=10)
+    p = subprocess.run(["adb", "-s", serial, "get-state"], capture_output=True, text=True, timeout=10)
+    return (p.stdout or p.stderr).strip().split("\n")[-1][:80]
 
 
 def public_device(dev):
@@ -328,6 +445,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"text": text})
             if parts[0] == "api" and not self._authorized(url):
                 return self._json({"error": "Wrong or missing token"}, 401)
+            if url.path == "/api/admin/config":
+                return self._json(CONFIG)
+            if url.path == "/api/admin/scan":
+                return self._json(scan_network())
             if len(parts) == 3 and parts[0] == "api":
                 dev = self._device(parts[1])
                 if parts[2] == "status":
@@ -355,6 +476,10 @@ class Handler(BaseHTTPRequestHandler):
         if not self._authorized(url):
             return self._json({"error": "Wrong or missing token"}, 401)
         try:
+            if url.path == "/api/admin/config":
+                return self._json(save_config(body))
+            if url.path == "/api/admin/connect":
+                return self._json({"state": connect_host(str(body.get("host", "")))})
             if len(parts) != 3 or parts[0] != "api":
                 return self._json({"error": "Not found"}, 404)
             dev, action = self._device(parts[1]), parts[2]
@@ -378,12 +503,14 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self._json({"error": "Not found"}, 404)
             return self._json({"ok": True})
-        except DeviceError as e:
-            return self._json({"error": str(e)}, 502)
+        except (DeviceError, ValueError, TypeError) as e:
+            return self._json({"error": str(e)}, 502 if isinstance(e, DeviceError) else 400)
 
     def _static(self, path):
         if path in ("", "/"):
             path = "/index.html"
+        elif path in ("/settings", "/settings/"):
+            path = "/settings.html"
         full = os.path.realpath(os.path.join(STATIC, path.lstrip("/")))
         if not full.startswith(STATIC + os.sep) or not os.path.isfile(full):
             self.send_error(404)

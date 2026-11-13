@@ -117,7 +117,7 @@ sh remote/run-on-pc.sh
 - **iPhone:** Adresse in **Safari** öffnen → Teilen-Knopf → **Zum Home-Bildschirm**. Danach öffnet sie sich im Vollbild wie eine App.
 - **Android:** in **Chrome** öffnen → ⋮ → **Zum Startbildschirm hinzufügen** (oder **App installieren**).
 
-In der App öffnet das Regler-Symbol die **Einstellungen**: Aussehen (Klassisch oder wie Apple TV), Steuerkreuz oder Touchpad, Sprache, Token.
+In der App öffnet das Regler-Symbol die schnellen **Einstellungen** (Aussehen, Steuerung, Sprache, Token). **Alle Einstellungen** öffnet `/settings`: Geräte und IPs mit Netz-Suche, Favoriten und ihre Reihenfolge, Touchpad-Tempo, Vibration, Token und Adressen für Sprachassistenten. Siehe [CONFIG.de.md](CONFIG.de.md).
 
 ## 6. AirPlay
 

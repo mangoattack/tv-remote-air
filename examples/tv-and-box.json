@@ -1,0 +1,28 @@
+{
+  "title": "Living room",
+  "port": 8080,
+  "token": "change-me-to-a-random-token",
+  "volumeDevice": "tv",
+  "devices": {
+    "tv": {
+      "name": "TV",
+      "host": "192.168.0.50",
+      "tvButton": { "input": "com.example.tvinput/.HdmiTvInputService/HW2" },
+      "inputNames": { "com.example.tvinput/.HdmiTvInputService/HW2": "Box", "com.example.tvinput/.HdmiTvInputService/HW3": "Console" },
+      "shortcuts": [
+        { "label": "Box", "icon": "hdmi", "input": "com.example.tvinput/.HdmiTvInputService/HW2" },
+        { "label": "Console", "icon": "hdmi", "input": "com.example.tvinput/.HdmiTvInputService/HW3" },
+        { "label": "Browser", "icon": "web", "app": "com.phlox.tvwebbrowser" }
+      ]
+    },
+    "box": {
+      "name": "Box",
+      "host": "192.168.0.51",
+      "box": true,
+      "hideApps": ["com.android.tv.settings"],
+      "shortcuts": [
+        { "label": "TV", "icon": "tv", "device": "tv", "key": "home" }
+      ]
+    }
+  }
+}

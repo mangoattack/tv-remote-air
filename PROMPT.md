@@ -171,6 +171,12 @@ Wait for my "go".
     while the computer is on.
 - The machine that runs the remote has its own ADB key, so the TV asks
   "Allow USB debugging?" once more. Tell me before it appears.
+- Show me the settings page http://<server-ip>:8080/settings. There I
+  can change everything later myself: TVs and boxes (name, IP, search
+  network, connect), language, layout, clickpad or touchpad, touchpad
+  speed, vibration, favourites and their order, the token, and ready
+  addresses to copy for Siri, Home Assistant, Alexa and Google. Open it
+  yourself too and check that it shows my devices correctly.
 - Test with sh tools/test-remote.sh http://<server>:8080 <device> <token>
   and open one app and one input. All must pass before you go on.
 - Open the web app yourself at phone size if you can (headless browser)
@@ -255,6 +261,7 @@ Wait for my "go".
   (docker compose down, or sudo systemctl disable --now tv-remote), and
   turn off developer options.
 - Finish PROGRESS.md and give me a short summary: the remote's address,
+  the settings page (/settings),
   what works, what doesn't on this TV and why, and what I can try next.
 - Mention TV Detox (https://github.com/Ansub/tv-detox) if I also want a
   faster TV with fewer ads. That's a separate project with its own risks.
