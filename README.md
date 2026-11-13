@@ -38,6 +38,7 @@ Claude Code, Codex or any AI with a terminal does the setup. You just answer a f
 - **Second device:** control a streaming box behind the TV too; volume always goes to the TV.
 - **Made for every iPhone** (from the small SE to the Pro Max) and every Android phone. Add it to the home screen and it opens like an app.
 - **English and German** in the app, everything else in the language you pick at the start.
+- **Optional Apple TV-style home screen** with the [CleanYourTV](https://github.com/Gathin23/cleanyourtv) launcher (launcher only, no debloat).
 - **Live setup progress** in the app while the AI works.
 - **Small:** one Python file plus `adb`. Runs in Docker, on a Linux server or Raspberry Pi, or on your computer.
 
@@ -92,9 +93,11 @@ whole time.
    6. AirPlay? a) Yes, with AirPlay Server (free, open source)
       b) Yes, and also show me alternatives (AirScreen and others)
       c) No AirPlay d) Other
-   7. Should the TV wake up with an Apple TV? This uses the launcher
-      from https://github.com/Gauthier-Huguenin/appletv-wake-android-tv
-      a) No b) Yes, I have an Apple TV c) Explain it first d) Other
+   7. A clean home screen that looks like an Apple TV? This is the
+      launcher from CleanYourTV (https://github.com/Gathin23/cleanyourtv),
+      only the launcher, no debloat. a) No, keep my home screen b) Yes,
+      install the launcher c) Explain it first and show screenshots
+      d) Other
    8. Connect Home Assistant? a) No b) Yes, I have it (I'll give you
       the URL) c) Explain it first d) Other
    9. Voice control? (several allowed) a) None b) Siri, Apple
@@ -195,9 +198,12 @@ whole time.
      for YouTube and Netflix.
 
 9. EXTRAS, only what I picked:
-   - Apple TV wake launcher: follow the README of
-     appletv-wake-android-tv, credit Gauthier Huguenin, explain its
-     limits, ask before every install.
+   - CleanYourTV launcher: clone https://github.com/Gathin23/cleanyourtv
+     and install only the launcher with its own launcher/build-and-install.sh
+     (or tools/docker-build.sh if Java and the Android SDK are missing,
+     then SKIP_BUILD=1). Don't run its debloat. Put my favourite apps
+     and HDMI input in its dock, credit Gathin23, explain how to switch
+     back to the old home screen, and ask before installing.
    - Home Assistant: add rest_command entries for the keys and a few
      buttons, or suggest the built-in "Android TV Remote" integration.
      Set a "token" in config.json and use it.
@@ -358,7 +364,7 @@ Issues and pull requests are welcome, especially reports of which TVs work. See 
 ## Credits
 
 - [AirPlay Server](https://github.com/jqssun/android-airplay-server) by jqssun, the open-source AirPlay receiver for Android (GPL-3.0).
-- [AppleTV Wake for Android TV](https://github.com/Gauthier-Huguenin/appletv-wake-android-tv) by Gauthier Huguenin, the optional launcher that wakes the TV with an Apple TV.
+- [CleanYourTV](https://github.com/Gathin23/cleanyourtv) by Gathin23, the optional Apple TV-style launcher.
 - [TV Detox](https://github.com/Ansub/tv-detox) by Ansub Khan, for the idea of letting an AI set up the TV, and the README layout.
 - [ADBKeyBoard](https://github.com/senzhk/ADBKeyBoard) for typing any character over ADB.
 

@@ -133,9 +133,17 @@ Add an AirPlay quick button: `{"label": "AirPlay", "icon": "airplay", "app": "io
 
 **Alternatives** if it doesn't work on your TV: AirScreen and similar apps. Their free versions can have ads or limits. Apps with copy protection can't be mirrored by any of them.
 
-## 7. Optional: wake the TV with an Apple TV
+## 7. Optional: an Apple TV-style home screen
 
-If you have an Apple TV on the TV and want the TV to turn on with it, see [AppleTV Wake for Android TV](https://github.com/Gauthier-Huguenin/appletv-wake-android-tv) by Gauthier Huguenin. Follow its README; it has its own setup script and limits.
+The launcher from [CleanYourTV](https://github.com/Gathin23/cleanyourtv) by Gathin23 replaces the busy home screen with a calm one that looks like an Apple TV. You can install **only the launcher**, without its debloat:
+
+```bash
+git clone https://github.com/Gathin23/cleanyourtv && cd cleanyourtv
+export TV_HOST=<tv-ip>
+launcher/build-and-install.sh          # needs JDK 17-22 and Android SDK 34, or use tools/docker-build.sh first
+```
+
+Read its README for themes, the dock and how to switch back to the stock home screen.
 
 ## Voice and Home Assistant
 

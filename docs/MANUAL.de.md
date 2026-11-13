@@ -133,9 +133,17 @@ AirPlay-Schnelltaste: `{"label": "AirPlay", "icon": "airplay", "app": "io.github
 
 **Alternativen**, falls es auf deinem TV nicht geht: AirScreen und ähnliche Apps. Deren Gratis-Versionen können Werbung oder Grenzen haben. Apps mit Kopierschutz kann keine davon spiegeln.
 
-## 7. Optional: TV mit dem Apple TV aufwecken
+## 7. Optional: Startbildschirm im Apple-TV-Stil
 
-Hängt ein Apple TV am TV und soll der TV mit ihm angehen, schau dir [AppleTV Wake for Android TV](https://github.com/Gauthier-Huguenin/appletv-wake-android-tv) von Gauthier Huguenin an. Folge seinem README, es hat ein eigenes Setup-Skript und eigene Grenzen.
+Der Launcher von [CleanYourTV](https://github.com/Gathin23/cleanyourtv) (von Gathin23) ersetzt den vollen Startbildschirm durch einen ruhigen, der wie Apple TV aussieht. Du kannst **nur den Launcher** installieren, ohne den Debloat:
+
+```bash
+git clone https://github.com/Gathin23/cleanyourtv && cd cleanyourtv
+export TV_HOST=<tv-ip>
+launcher/build-and-install.sh          # braucht JDK 17-22 und Android SDK 34, oder zuerst tools/docker-build.sh
+```
+
+Im README dort stehen Themes, Dock und wie du zum alten Startbildschirm zurückkommst.
 
 ## Sprache und Home Assistant
 
