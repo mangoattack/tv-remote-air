@@ -1,0 +1,31 @@
+{
+  "title": "TV Remote",
+  "port": 8080,
+  "token": "",
+  "volumeDevice": "tv",
+  "devices": {
+    "tv": {
+      "name": "Living room TV",
+      "host": "192.168.0.50",
+      "port": 5555,
+      "adbKeyboard": false,
+      "tvButton": { "key": "home" },
+      "inputNames": {},
+      "names": {},
+      "hideApps": [],
+      "shortcuts": [
+        { "label": "HDMI 2", "icon": "hdmi", "input": "com.example.tvinput/.HdmiTvInputService/HW2" },
+        { "label": "Browser", "icon": "web", "app": "com.phlox.tvwebbrowser/.activity.main.MainActivity" },
+        { "label": "AirPlay", "icon": "airplay", "app": "io.github.jqssun.airplay" }
+      ]
+    },
+    "box": {
+      "name": "Streaming box",
+      "host": "192.168.0.51",
+      "box": true,
+      "shortcuts": [
+        { "label": "TV", "icon": "tv", "device": "tv", "key": "home" }
+      ]
+    }
+  }
+}

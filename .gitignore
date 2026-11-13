@@ -1,0 +1,5 @@
+remote/config.json
+remote/adb-keys/
+__pycache__/
+*.pyc
+.DS_Store

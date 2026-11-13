@@ -1,0 +1,15 @@
+[Unit]
+Description=TV Remote Air (web remote for Android TV)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/tv-remote-air/remote
+ExecStartPre=-/usr/bin/adb start-server
+ExecStart=/usr/bin/python3 /opt/tv-remote-air/remote/server.py
+Restart=always
+RestartSec=3
+Environment=HOME=/root
+
+[Install]
+WantedBy=multi-user.target

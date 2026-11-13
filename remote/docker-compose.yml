@@ -1,0 +1,12 @@
+services:
+  tv-remote:
+    build: .
+    container_name: tv-remote
+    restart: unless-stopped
+    # Host network: the TV sees the real LAN address and phones reach the app on http://<host-ip>:8080
+    network_mode: host
+    volumes:
+      - ./config.json:/config/config.json:ro
+      - ../PROGRESS.md:/config/PROGRESS.md:ro
+      # Keeps the ADB key, so the TV only asks "Allow USB debugging?" once.
+      - ./adb-keys:/root/.android

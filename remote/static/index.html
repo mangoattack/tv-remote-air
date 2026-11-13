@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TV Remote">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<title>TV Remote</title>
+<style>
+  :root {
+    --bg: #000; --fill: #1c1c1e; --fill2: #2c2c2e; --fill3: #3a3a3c; --sep: rgba(84,84,88,.6);
+    --text: #fff; --muted: #8e8e93; --accent: #0a84ff; --grad: linear-gradient(135deg, #5e5ce6, #0a84ff);
+    --red: #ff453a; --green: #30d158;
+    --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); overscroll-behavior: none;
+    font: 17px -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; letter-spacing: -.01em; }
+  body { position: fixed; inset: 0; overflow: hidden; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; touch-action: manipulation; }
+  svg { display: block; }
+  [hidden] { display: none !important; }
+
+  .app { height: 100%; display: flex; flex-direction: column; align-items: center;
+    padding: calc(var(--st) + 8px) 20px calc(var(--sb) + 14px); gap: clamp(10px, 2.2dvh, 24px); }
+  .app > * { width: 100%; max-width: 430px; }
+
+  /* Top: device picker, settings and power */
+  header { display: flex; align-items: center; gap: 10px; }
+  .picker { flex: 1; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--fill);
+    border-radius: 10px; padding: 2px; position: relative; min-height: 36px; }
+  .picker .thumb { position: absolute; top: 2px; bottom: 2px; left: 2px; border-radius: 8px; background: #636366;
+    box-shadow: 0 3px 8px rgba(0,0,0,.25); transition: transform .28s cubic-bezier(.3,.7,.3,1); }
+  .picker button { position: relative; z-index: 1; padding: 8px 6px; font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; overflow: hidden; }
+  .title { flex: 1; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding-left: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #48484a; flex: none; transition: background .3s; }
+  .dot.ok { background: var(--green); } .dot.bad { background: var(--red); }
+  .round { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--fill); display: grid; place-items: center; }
+  .round:active { background: var(--fill3); }
+  .power { color: var(--red); }
+
+  /* Quick actions */
+  .quick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .quick button { background: var(--fill); border-radius: 14px; padding: 10px 4px 9px; font-size: 12px; font-weight: 500;
+    color: #d1d1d6; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: background .15s, transform .1s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .quick button:active { background: var(--fill3); transform: scale(.96); }
+  .quick svg { width: 24px; height: 24px; }
+  .quick .tint { color: #64d2ff; }
+
+  /* Click pad: swipe anywhere, tap the ring for arrows, tap the centre for OK */
+  .padwrap { flex: 1; min-height: 170px; display: grid; place-items: center; container-type: size; }
+  .pad { --d: min(82vw, 340px, 100cqh); width: var(--d); height: var(--d); border-radius: 50%; position: relative;
+    background: radial-gradient(circle at 50% 35%, #2c2c30 0%, #1a1a1c 70%); touch-action: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.6); }
+  .pad .chev { position: absolute; color: #636366; transition: color .12s; pointer-events: none; width: 26px; height: 26px; }
+  .pad .chev.up { top: 9%; left: calc(50% - 13px); } .pad .chev.down { bottom: 9%; left: calc(50% - 13px); }
+  .pad .chev.left { left: 9%; top: calc(50% - 13px); } .pad .chev.right { right: 9%; top: calc(50% - 13px); }
+  .pad .chev.lit { color: #fff; }
+  .pad .center { position: absolute; inset: 32%; border-radius: 50%; background: #2c2c2e; pointer-events: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07); transition: background .1s, transform .1s; }
+  .pad.ok-down .center { background: #48484a; transform: scale(.96); }
+  .pad .glow { position: absolute; width: 70px; height: 70px; margin: -35px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%); opacity: 0; transition: opacity .2s; }
+  .pad.touching .glow { opacity: 1; transition: none; }
+  .modes { display: flex; justify-content: center; }
+  .modes .picker { flex: none; width: 230px; }
+  .modes .picker button { font-size: 13px; padding: 6px; }
+  .tp { width: 100%; height: 100%; border-radius: 26px; position: relative; touch-action: none;
+    background: linear-gradient(160deg, #232326, #161618); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.6);
+    display: grid; place-items: center; overflow: hidden; }
+  .tp .hint { color: #48484a; font-size: 14px; text-align: center; line-height: 1.5; pointer-events: none; padding: 0 20px; }
+  .tp .knob { position: absolute; width: 56px; height: 56px; margin: -28px; border-radius: 50%; pointer-events: none;
+    border: 2px solid rgba(255,255,255,.25); opacity: 0; }
+  .tp .stick { position: absolute; width: 34px; height: 34px; margin: -17px; border-radius: 50%; pointer-events: none;
+    background: rgba(255,255,255,.22); opacity: 0; }
+  .tp.touching .knob, .tp.touching .stick { opacity: 1; }
+  body.touchpad .pad, body:not(.touchpad) .tp { display: none; }
+
+  /* Classic layout: Siri Remote style buttons */
+  .buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px clamp(16px, 6vw, 34px); justify-items: center;
+    padding: 0 clamp(4px, 4vw, 24px); }
+  .b { width: clamp(56px, 16.5vw, 70px); height: clamp(56px, 16.5vw, 70px); border-radius: 50%; background: var(--fill);
+    display: grid; place-items: center; transition: background .12s, transform .1s; }
+  .b:active, .b.pressed { background: var(--fill3); transform: scale(.94); }
+  .b svg { width: 26px; height: 26px; }
+  .volpill { grid-row: span 2; width: clamp(56px, 16.5vw, 70px); border-radius: 999px; background: var(--fill);
+    display: grid; grid-template-rows: 1fr 1fr; overflow: hidden; }
+  .volpill button { display: grid; place-items: center; transition: background .12s; }
+  .volpill button:active, .volpill button.pressed { background: var(--fill3); }
+  .volpill svg { width: 24px; height: 24px; }
+
+  /* Apple TV layout: big touch surface, media row, volume bar */
+  body.atv .quick, body.atv .buttons, body.atv .modes { display: none; }
+  body:not(.atv) .atvonly { display: none; }
+  body.atv .pad { --d: min(86vw, 360px, 100cqh); }
+  .toolbar { display: flex; justify-content: space-between; gap: 8px; }
+  .toolbar button { flex: 1; height: 40px; border-radius: 12px; background: var(--fill); display: grid; place-items: center; color: #d1d1d6; }
+  .toolbar button:active { background: var(--fill3); }
+  .toolbar svg { width: 22px; height: 22px; }
+  .media { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; justify-items: center; }
+  .media .b { width: clamp(54px, 16vw, 66px); height: clamp(54px, 16vw, 66px); }
+  .media .b.small svg { width: 22px; height: 22px; }
+  .volbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: var(--fill);
+    border-radius: 999px; height: 54px; overflow: hidden; }
+  .volbar button { height: 100%; display: grid; place-items: center; }
+  .volbar button:active, .volbar button.pressed { background: var(--fill3); }
+  .volbar span { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+
+  /* Sheets */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 10; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; height: calc(88dvh - var(--st)); background: #1c1c1e;
+    border-radius: 14px 14px 0 0; transform: translateY(105%); transition: transform .35s cubic-bezier(.2,.8,.2,1);
+    z-index: 11; display: flex; flex-direction: column; padding: 8px 16px 0; max-width: 600px; margin: 0 auto; }
+  .sheet.kbmode { height: auto; max-height: 88dvh; }
+  body.open .scrim { opacity: 1; pointer-events: auto; } body.open .sheet { transform: none; }
+  .grab { width: 36px; height: 5px; border-radius: 3px; background: #48484a; margin: 0 auto 4px; flex: none; }
+  .sheet header { padding: 6px 0 12px; }
+  .sheet h2 { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
+  .pill { background: var(--fill2); border-radius: 999px; padding: 6px 14px; font-size: 15px; font-weight: 500; color: var(--accent); }
+  .search { width: 100%; font: inherit; font-size: 17px; color: var(--text); background: rgba(118,118,128,.24); border: 0; border-radius: 10px;
+    padding: 9px 12px; margin-bottom: 12px; -webkit-user-select: text; user-select: text; outline: none; }
+  .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--sb) + 16px); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 16px 10px; }
+  .app-tile { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 12px; text-align: center; line-height: 1.2; color: #e5e5ea; }
+  .app-tile .ic { width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: var(--fill2) center / contain no-repeat;
+    display: grid; place-items: center; overflow: hidden; transition: transform .12s; }
+  .app-tile:active .ic { transform: scale(.94); }
+  .app-tile .ic span { font-size: 26px; font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .app-tile .nm { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .list { background: var(--fill2); border-radius: 12px; overflow: hidden; margin-bottom: 18px; }
+  .list button, .list .row { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; font-size: 17px; gap: 12px; }
+  .list > * + * { border-top: .5px solid var(--sep); }
+  .list button:active { background: var(--fill3); }
+  .list small { color: var(--muted); font-size: 15px; }
+  .check { color: var(--accent); font-weight: 600; }
+  .label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .03em; margin: 0 4px 6px; }
+  .muted { color: var(--muted); font-size: 15px; padding: 8px 2px; }
+  .progress { white-space: pre-wrap; font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace; color: #d1d1d6;
+    background: var(--fill2); border-radius: 12px; padding: 14px; -webkit-user-select: text; user-select: text; }
+  .kbfield, .tokenfield { width: 100%; font: inherit; font-size: 20px; color: var(--text); background: var(--fill2); border: 0; border-radius: 12px;
+    padding: 14px 16px; -webkit-user-select: text; user-select: text; outline: none; }
+  .tokenfield { font-size: 17px; margin-bottom: 18px; }
+  .kbbar { display: flex; gap: 10px; margin: 12px 0 calc(var(--sb) + 14px); }
+  .kbbar button { flex: 1; background: var(--fill2); border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 600; }
+  .kbbar button.go { background: var(--grad); color: #fff; }
+  .kbbar button:active { opacity: .7; }
+
+  .toast { position: fixed; left: 50%; top: calc(var(--st) + 8px); transform: translate(-50%, -160%); z-index: 30;
+    background: rgba(44,44,46,.92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; max-width: 92vw; text-align: center;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1); box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .toast.show { transform: translate(-50%, 0); }
+  .haptic { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+
+  /* Small phones (iPhone 13 mini / SE): tighter spacing so nothing scrolls */
+  @media (max-height: 700px) {
+    .app { gap: 8px; }
+    .quick button { padding: 7px 4px 6px; }
+    .buttons { gap: 10px clamp(16px, 6vw, 34px); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="picker" id="picker"><div class="thumb" id="thumb"></div></div>
+    <div class="title" id="single" hidden></div>
+    <button class="round" id="btnSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+    </button>
+    <button class="round power" data-key="power" aria-label="Power">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8.5"/><path d="M6.4 6.8a8 8 0 1 0 11.2 0"/></svg>
+    </button>
+  </header>
+
+  <div class="quick" id="quick"></div>
+
+  <!-- Apple TV layout: tool row on top -->
+  <div class="toolbar atvonly">
+    <button id="tApps" aria-label="Apps"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2.2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2.2"/></svg></button>
+    <button id="tInputs" aria-label="Inputs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M4 12h16M4 17h8"/><circle cx="18" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg></button>
+    <button id="tKb" aria-label="Keyboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5.5" width="20" height="13" rx="2.5"/><path d="M6 9.5h.01M10 9.5h.01M14 9.5h.01M18 9.5h.01M6 12.5h.01M18 12.5h.01M8 15.5h8"/></svg></button>
+    <button id="tMode" aria-label="Touchpad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></button>
+  </div>
+
+  <div class="modes" id="modes"><div class="picker" id="modePicker"><div class="thumb" id="modeThumb" style="width:calc((100% - 4px) / 2)"></div>
+    <button data-mode="pad" data-t="clickpad">Clickpad</button><button data-mode="touchpad" data-t="touchpad">Touchpad</button></div></div>
+
+  <div class="padwrap">
+    <div class="tp" id="tp">
+      <div class="hint" data-t="tpHint">Hold and drag to move the pointer.<br>Further away = faster. Tap = OK.</div>
+      <div class="knob" id="tpKnob"></div><div class="stick" id="tpStick"></div>
+    </div>
+    <div class="pad" id="pad" aria-label="Clickpad">
+      <svg class="chev up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>
+      <svg class="chev down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      <svg class="chev left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+      <svg class="chev right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      <div class="center"></div>
+      <div class="glow" id="glow"></div>
+    </div>
+  </div>
+
+  <!-- Classic layout -->
+  <div class="buttons">
+    <button class="b" data-key="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <button class="b" data-key="tv" aria-label="TV / Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8"/></svg></button>
+    <div class="volpill">
+      <button data-vol="volup" data-repeat aria-label="Volume up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button data-vol="voldown" data-repeat aria-label="Volume down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+    </div>
+    <button class="b" data-key="playpause" aria-label="Play/Pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5v13a.8.8 0 0 0 1.2.7l9.3-6.5a.8.8 0 0 0 0-1.4L4.2 4.8A.8.8 0 0 0 3 5.5z"/><rect x="15.5" y="5" width="2.4" height="14" rx="1.1"/><rect x="19.6" y="5" width="2.4" height="14" rx="1.1"/></svg></button>
+    <button class="b" data-vol="mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m22 9-6 6M16 9l6 6"/></svg></button>
+  </div>
+
+  <!-- Apple TV layout: media keys and a volume bar -->
+  <div class="media atvonly">
+    <button class="b" data-key="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <button class="b" data-key="tv" aria-label="TV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8"/></svg></button>
+    <button class="b small" data-key="search" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg></button>
+    <button class="b small" data-vol="mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m22 9-6 6M16 9l6 6"/></svg></button>
+    <button class="b small" data-key="rewind" data-repeat aria-label="Rewind"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6.5v11a.7.7 0 0 1-1.1.6L2.6 12.6a.7.7 0 0 1 0-1.2l7.3-5.5a.7.7 0 0 1 1.1.6zM21.5 6.5v11a.7.7 0 0 1-1.1.6l-7.3-5.5a.7.7 0 0 1 0-1.2l7.3-5.5a.7.7 0 0 1 1.1.6z"/></svg></button>
+    <button class="b" data-key="playpause" aria-label="Play/Pause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5v13a.8.8 0 0 0 1.2.7l9.3-6.5a.8.8 0 0 0 0-1.4L4.2 4.8A.8.8 0 0 0 3 5.5z"/><rect x="15.5" y="5" width="2.4" height="14" rx="1.1"/><rect x="19.6" y="5" width="2.4" height="14" rx="1.1"/></svg></button>
+    <button class="b small" data-key="stop" aria-label="Stop"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg></button>
+    <button class="b small" data-key="forward" data-repeat aria-label="Fast forward"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 6.5v11a.7.7 0 0 0 1.1.6l7.3-5.5a.7.7 0 0 0 0-1.2l-7.3-5.5a.7.7 0 0 0-1.1.6zM2.5 6.5v11a.7.7 0 0 0 1.1.6l7.3-5.5a.7.7 0 0 0 0-1.2L3.6 5.9a.7.7 0 0 0-1.1.6z"/></svg></button>
+  </div>
+  <div class="volbar atvonly">
+    <button data-vol="voldown" data-repeat aria-label="Volume down"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+    <span data-t="volume">Volume</span>
+    <button data-vol="volup" data-repeat aria-label="Volume up"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="grab" id="grab"></div>
+  <header><h2 id="sheetTitle"></h2><button class="pill" id="sheetAction" hidden></button></header>
+  <div id="sheetBody" style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
+</div>
+<div class="toast" id="toast"></div>
+<label class="haptic" id="hapticLabel"><input type="checkbox" switch id="hapticInput"></label>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+};
+
+// ---------------------------------------------------------------- language (English and German)
+const TEXT = {
+  en: { apps: "Apps", inputs: "Inputs", keyboard: "Keyboard", clickpad: "Clickpad", touchpad: "Touchpad", volume: "Volume",
+    tpHint: "Hold and drag to move the pointer.<br>Further away = faster. Tap = OK.", settings: "Settings",
+    layout: "Layout", classic: "Classic", appletv: "Apple TV style", control: "Control", language: "Language",
+    auto: "Automatic", token: "Access token", tokenHint: "Only needed if the server has a token.", progress: "Setup progress",
+    noProgress: "No PROGRESS.md yet.", reload: "Reload", loadingApps: "Loading apps …", noApp: "No app found",
+    search: "Search", loadingInputs: "Loading inputs …", noInputs: "This device has no inputs.", kbPlaceholder: "Type to write on the TV",
+    clear: "Clear", done: "Done", opening: " is opening", noServer: "Server not reachable", error: "Error", tv: "TV" },
+  de: { apps: "Apps", inputs: "Eingänge", keyboard: "Tastatur", clickpad: "Steuerkreuz", touchpad: "Touchpad", volume: "Lautstärke",
+    tpHint: "Finger halten und ziehen bewegt den Zeiger.<br>Weiter weg = schneller. Tippen = OK.", settings: "Einstellungen",
+    layout: "Aussehen", classic: "Klassisch", appletv: "Wie Apple TV", control: "Steuerung", language: "Sprache",
+    auto: "Automatisch", token: "Zugangs-Token", tokenHint: "Nur nötig, wenn der Server ein Token hat.", progress: "Einrichtungs-Fortschritt",
+    noProgress: "Noch keine PROGRESS.md.", reload: "Neu laden", loadingApps: "Lade Apps …", noApp: "Keine App gefunden",
+    search: "Suchen", loadingInputs: "Lade Eingänge …", noInputs: "Dieses Gerät hat keine Eingänge.", kbPlaceholder: "Tippen, um auf dem TV zu schreiben",
+    clear: "Löschen", done: "Fertig", opening: " wird geöffnet", noServer: "Server nicht erreichbar", error: "Fehler", tv: "TV" },
+};
+const lang = () => { const l = store.get("lang", "auto"); return l !== "auto" ? l : (navigator.language || "en").startsWith("de") ? "de" : "en"; };
+const t = (k) => TEXT[lang()][k] ?? TEXT.en[k] ?? k;
+function translate() {
+  document.documentElement.lang = lang();
+  document.querySelectorAll("[data-t]").forEach(e => e.innerHTML = t(e.dataset.t));
+}
+
+let cfg = { devices: [] }, current = store.get("device", "");
+const cur = () => cfg.devices.find(d => d.id === current) || cfg.devices[0];
+const volDev = () => cfg.devices.find(d => d.id === cfg.volumeDevice) || cur();
+
+// iOS 18+ Safari ticks the Taptic Engine when a switch checkbox toggles; elsewhere use vibrate.
+function haptic() {
+  if (navigator.vibrate) { navigator.vibrate(8); return; }
+  try { $("hapticLabel").click(); } catch {}
+}
+
+function toast(msg) {
+  const el = $("toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+async function api(path, body) {
+  const headers = { "X-Token": store.get("token", "") };
+  const opts = body === undefined ? { headers } :
+    { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch("/api/" + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || t("error"));
+  return data;
+}
+
+// Keys go out one after another, so a fast swipe series arrives in order.
+let queue = Promise.resolve();
+function send(dev, key, extra) {
+  queue = queue.then(() => api(dev + "/key", { key, ...extra }).catch(e => toast(e.message)));
+  return queue;
+}
+
+// ---------------------------------------------------------------- header and quick actions
+const ICONS = {
+  apps: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2.2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2.2"/></svg>',
+  inputs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M4 12h16M4 17h8"/><circle cx="18" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg>',
+  keyboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="5.5" width="20" height="13" rx="2.5"/><path d="M6 9.5h.01M10 9.5h.01M14 9.5h.01M18 9.5h.01M6 12.5h.01M18 12.5h.01M8 15.5h8"/></svg>',
+  hdmi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18v5l-3 3H6l-3-3z"/><path d="M7 11h10"/></svg>',
+  web: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>',
+  airplay: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><path d="m12 15 5 6H7z"/></svg>',
+  tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+};
+
+function renderHeader() {
+  const p = $("picker"), multi = cfg.devices.length > 1;
+  p.hidden = !multi; $("single").hidden = multi;
+  p.querySelectorAll("button").forEach(b => b.remove());
+  cfg.devices.forEach(d => {
+    const b = document.createElement("button");
+    const dot = document.createElement("span"); dot.className = "dot"; dot.dataset.dev = d.id;
+    b.append(dot, document.createTextNode(d.name));
+    b.onclick = () => { haptic(); select(d.id); };
+    p.appendChild(b);
+  });
+  if (!multi) {
+    const dot = document.createElement("span"); dot.className = "dot"; dot.dataset.dev = cur().id;
+    $("single").replaceChildren(dot, document.createTextNode(cur().name));
+  }
+  const idx = Math.max(0, cfg.devices.findIndex(d => d.id === cur().id));
+  $("thumb").style.width = `calc((100% - 4px) / ${cfg.devices.length})`;
+  $("thumb").style.transform = `translateX(${idx * 100}%)`;
+
+  // Quick actions: apps, inputs (TVs only), keyboard, then the shortcuts from config.json.
+  const dev = cur(), q = $("quick");
+  const items = [["apps", t("apps"), showApps], ...(dev.box ? [] : [["inputs", t("inputs"), showInputs]]),
+    ["keyboard", t("keyboard"), showKeyboard],
+    ...dev.shortcuts.map((s, i) => [s.icon || "star", s.label, () => runShortcut(dev, i, s), true])];
+  q.replaceChildren(...items.slice(0, 6).map(([icon, label, run, tint]) => {
+    const b = document.createElement("button"); if (tint) b.className = "tint";
+    b.innerHTML = ICONS[icon] || ICONS.star; b.append(document.createTextNode(label));
+    b.onclick = () => { haptic(); run(); };
+    return b;
+  }));
+  $("tInputs").hidden = !!dev.box;
+}
+
+function select(id) { current = id; store.set("device", id); renderHeader(); refreshStatus(); }
+
+async function refreshStatus() {
+  await Promise.all(cfg.devices.map(async d => {
+    let ok = false;
+    try { ok = (await api(d.id + "/status")).online; } catch {}
+    document.querySelectorAll(`.dot[data-dev="${d.id}"]`).forEach(dot => dot.className = "dot " + (ok ? "ok" : "bad"));
+  }));
+}
+
+function runShortcut(dev, index, s) {
+  api(dev.id + "/shortcut", { index }).then(() => toast(s.label + t("opening"))).catch(e => toast(e.message));
+}
+
+// ---------------------------------------------------------------- buttons with hold-to-repeat
+function bindPress(el, fire) {
+  let timer = null, rep = null;
+  const start = (e) => {
+    e.preventDefault(); el.classList.add("pressed"); haptic(); fire();
+    if (el.hasAttribute("data-repeat")) timer = setTimeout(() => rep = setInterval(fire, 150), 450);
+  };
+  const end = () => { el.classList.remove("pressed"); clearTimeout(timer); clearInterval(rep); };
+  el.addEventListener("pointerdown", start);
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, end));
+  el.addEventListener("contextmenu", e => e.preventDefault());
+}
+document.querySelectorAll("[data-key]").forEach(el => bindPress(el, () => send(cur().id, el.dataset.key)));
+// Volume goes to the device that drives the speakers (volumeDevice in config.json), usually the TV.
+document.querySelectorAll("[data-vol]").forEach(el => bindPress(el, () => send(volDev().id, el.dataset.vol)));
+
+// ---------------------------------------------------------------- click pad
+(() => {
+  const pad = $("pad"), glow = $("glow");
+  const chev = (d) => pad.querySelector(".chev." + d);
+  let sx, sy, lx, ly, moved, steps, holdTimer, holdRep;
+  const STEP = 46;                         // px of swipe per step
+  const flash = (d) => { const c = chev(d); if (!c) return; c.classList.add("lit"); setTimeout(() => c.classList.remove("lit"), 160); };
+  const fire = (d) => { haptic(); flash(d); send(cur().id, d); };
+  const local = (e) => { const r = pad.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width]; };
+  const dirOf = (dx, dy) => Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+
+  pad.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); pad.setPointerCapture(e.pointerId);
+    const [x, y, w] = local(e); sx = lx = x; sy = ly = y; moved = false; steps = 0;
+    pad.classList.add("touching"); glow.style.left = x + "px"; glow.style.top = y + "px";
+    const dx = x - w / 2, dy = y - w / 2, r = Math.hypot(dx, dy) / (w / 2);
+    if (r < .36) pad.classList.add("ok-down");
+    // Holding the ring repeats that arrow, like a held button.
+    else holdTimer = setTimeout(() => { if (!moved) { const d = dirOf(dx, dy); fire(d); holdRep = setInterval(() => fire(d), 160); steps = 1; } }, 450);
+  });
+  pad.addEventListener("pointermove", (e) => {
+    if (sx === undefined) return;
+    const [x, y] = local(e); glow.style.left = x + "px"; glow.style.top = y + "px";
+    const dx = x - lx, dy = y - ly;
+    if (Math.hypot(x - sx, y - sy) > 12) { moved = true; pad.classList.remove("ok-down"); clearTimeout(holdTimer); }
+    if (Math.abs(dx) >= STEP || Math.abs(dy) >= STEP) { fire(dirOf(dx, dy)); steps++; lx = x; ly = y; }
+  });
+  const end = (e) => {
+    if (sx === undefined) return;
+    clearTimeout(holdTimer); clearInterval(holdRep);
+    pad.classList.remove("touching", "ok-down");
+    if (!moved && steps === 0) {
+      const [, , w] = local(e); const dx = sx - w / 2, dy = sy - w / 2, r = Math.hypot(dx, dy) / (w / 2);
+      if (r < .36) { haptic(); send(cur().id, "ok"); } else fire(dirOf(dx, dy));
+    } else if (moved && steps === 0) {
+      // A short flick that never reached a full step still counts as one.
+      const [x, y] = local(e); const dx = x - sx, dy = y - sy;
+      if (Math.hypot(dx, dy) > 24) fire(dirOf(dx, dy));
+    }
+    sx = undefined;
+  };
+  pad.addEventListener("pointerup", end);
+  pad.addEventListener("pointercancel", end);
+})();
+
+// ---------------------------------------------------------------- touchpad
+// TV browsers (TV Bro and others) move their pointer with the arrow keys. The touchpad works like a joystick:
+// hold and drag from where the finger landed; the further away, the faster the arrows repeat.
+(() => {
+  const tp = $("tp"), knob = $("tpKnob"), stick = $("tpStick");
+  let sx, sy, x, y, fx, fy, timer = null, moved = false, pending = 0, dir = null, diagFlip = false;
+  const DEAD = 22;                  // finger drift below this never moves the pointer
+  const fast = (d) => {             // one key in flight at most, so nothing piles up and overshoots
+    if (pending >= 1) return;
+    pending++; api(cur().id + "/key", { key: d }).catch(e => toast(e.message)).finally(() => pending--);
+  };
+  // Direction from the smoothed drag, snapped to the nearest of 8 directions; it only changes when the
+  // finger is clearly in another sector (hysteresis), so a shaky thumb doesn't zig-zag the pointer.
+  const pick = (dx, dy) => {
+    const a = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+    const sector = Math.round(a / 45) % 8;
+    if (dir !== null && dir !== sector) {
+      const centre = dir * 45, off = Math.min(Math.abs(a - centre), 360 - Math.abs(a - centre));
+      if (off < 34) return dir;     // still close enough to the old direction: keep it
+    }
+    return sector;
+  };
+  const KEYS = [["right"], ["right", "down"], ["down"], ["down", "left"], ["left"], ["left", "up"], ["up"], ["up", "right"]];
+  const tick = () => {
+    fx += (x - fx) * .35; fy += (y - fy) * .35;          // low-pass filter on the finger position
+    const dx = fx - sx, dy = fy - sy, dist = Math.hypot(dx, dy);
+    let wait = 90;
+    if (dist > DEAD) {
+      moved = true; dir = pick(dx, dy);
+      const keys = KEYS[dir];
+      fast(keys.length === 1 ? keys[0] : keys[(diagFlip = !diagFlip) ? 0 : 1]);
+      // Gentle speed curve: 280 ms per step near the dead zone, down to 90 ms far out.
+      wait = Math.max(90, 280 - (dist - DEAD) * 1.5);
+    } else dir = null;
+    timer = setTimeout(tick, wait);
+  };
+  tp.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); tp.setPointerCapture(e.pointerId);
+    const r = tp.getBoundingClientRect(); sx = x = fx = e.clientX - r.left; sy = y = fy = e.clientY - r.top;
+    moved = false; dir = null; tp.classList.add("touching");
+    knob.style.left = stick.style.left = sx + "px"; knob.style.top = stick.style.top = sy + "px";
+    knob.style.width = knob.style.height = DEAD * 2 + "px"; knob.style.margin = -DEAD + "px";
+    timer = setTimeout(tick, 60);
+  });
+  tp.addEventListener("pointermove", (e) => {
+    if (sx === undefined) return;
+    const r = tp.getBoundingClientRect(); x = e.clientX - r.left; y = e.clientY - r.top;
+    stick.style.left = x + "px"; stick.style.top = y + "px";
+  });
+  const end = () => {
+    if (sx === undefined) return;
+    clearTimeout(timer); tp.classList.remove("touching");
+    if (!moved && Math.hypot(x - sx, y - sy) < DEAD) { haptic(); send(cur().id, "ok"); }
+    sx = undefined;
+  };
+  tp.addEventListener("pointerup", end); tp.addEventListener("pointercancel", end);
+})();
+
+function setMode(m) {
+  document.body.classList.toggle("touchpad", m === "touchpad");
+  $("modeThumb").style.transform = `translateX(${m === "touchpad" ? 100 : 0}%)`;
+  store.set("mode", m);
+}
+document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { haptic(); setMode(b.dataset.mode); });
+$("tMode").onclick = () => { haptic(); setMode(document.body.classList.contains("touchpad") ? "pad" : "touchpad"); };
+function setLayout(l) { document.body.classList.toggle("atv", l === "atv"); store.set("layout", l); }
+
+// ---------------------------------------------------------------- sheets
+function openSheet(title, body, action, kbmode) {
+  $("sheetTitle").textContent = title;
+  $("sheetBody").replaceChildren(body);
+  $("sheet").classList.toggle("kbmode", !!kbmode);
+  const a = $("sheetAction"); a.hidden = !action;
+  if (action) { a.textContent = action.label; a.onclick = action.run; }
+  document.body.classList.add("open");
+}
+function closeSheet() { document.activeElement && document.activeElement.blur(); document.body.classList.remove("open"); }
+$("scrim").onclick = closeSheet;
+// Drag the grabber (or header) down to close.
+(() => {
+  const sh = $("sheet"); let y0 = null;
+  sh.querySelector("header").addEventListener("touchstart", e => y0 = e.touches[0].clientY, { passive: true });
+  $("grab").addEventListener("touchstart", e => y0 = e.touches[0].clientY, { passive: true });
+  sh.addEventListener("touchmove", e => { if (y0 === null) return; const d = e.touches[0].clientY - y0;
+    if (d > 0) { sh.style.transition = "none"; sh.style.transform = `translateY(${d}px)`; } }, { passive: true });
+  sh.addEventListener("touchend", e => { if (y0 === null) return; const d = e.changedTouches[0].clientY - y0; y0 = null;
+    sh.style.transition = ""; sh.style.transform = ""; if (d > 90) closeSheet(); });
+})();
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+async function showApps() {
+  const dev = cur();
+  const wrap = el("div"); wrap.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0";
+  const search = el("input", "search"); search.placeholder = t("search"); search.type = "search";
+  const scroll = el("div", "scroll"); const grid = el("div", "grid"); scroll.appendChild(grid);
+  wrap.append(search, scroll);
+  grid.replaceChildren(el("div", "muted", t("loadingApps")));
+  openSheet(t("apps") + " · " + dev.name, wrap, { label: t("reload"), run: async () => {
+    await api(dev.id + "/refresh", {}).catch(() => {}); showApps(); } });
+  let apps = [];
+  const draw = () => {
+    const q = search.value.trim().toLowerCase();
+    const shown = apps.filter(a => !q || a.name.toLowerCase().includes(q));
+    grid.replaceChildren(...shown.map(a => {
+      const b = el("button", "app-tile"); const ic = el("div", "ic");
+      if (a.icon) ic.style.backgroundImage = `url("${a.icon}")`; else ic.appendChild(el("span", "", a.name.slice(0, 1)));
+      b.append(ic, el("div", "nm", a.name));
+      b.onclick = () => { haptic(); closeSheet(); api(dev.id + "/app", { id: a.id }).then(() => toast(a.name + t("opening"))).catch(e => toast(e.message)); };
+      return b;
+    }));
+    if (!shown.length) grid.appendChild(el("div", "muted", t("noApp")));
+  };
+  search.addEventListener("input", draw);
+  try { apps = await api(dev.id + "/apps"); draw(); }
+  catch (e) { grid.replaceChildren(el("div", "muted", e.message)); }
+}
+
+async function showInputs() {
+  const dev = cur();
+  const scroll = el("div", "scroll"); const list = el("div", "list"); scroll.appendChild(list);
+  list.replaceChildren(el("div", "muted", t("loadingInputs")));
+  openSheet(t("inputs") + " · " + dev.name, scroll);
+  try {
+    const inputs = await api(dev.id + "/inputs");
+    if (!inputs.length) return list.replaceChildren(el("div", "row muted", t("noInputs")));
+    list.replaceChildren(...inputs.map(i => {
+      const b = el("button"); b.append(el("span", "", i.name), el("span", "dot " + (i.connected ? "ok" : "")));
+      b.onclick = () => { haptic(); closeSheet(); api(dev.id + "/input", { id: i.id }).catch(e => toast(e.message)); };
+      return b;
+    }));
+  } catch (e) { list.replaceChildren(el("div", "row muted", e.message)); }
+}
+
+// Live typing like the Apple TV remote: every change goes to the TV as you type.
+function showKeyboard() {
+  const dev = cur();
+  const wrap = el("div");
+  const field = el("input", "kbfield"); field.placeholder = t("kbPlaceholder");
+  field.autocomplete = "off"; field.setAttribute("autocorrect", "off"); field.setAttribute("autocapitalize", "off");
+  field.spellcheck = false; field.enterKeyHint = "search";
+  const bar = el("div", "kbbar");
+  const del = el("button", "", t("clear")), go = el("button", "go", t("done"));
+  bar.append(del, go); wrap.append(field, bar);
+  openSheet(t("keyboard") + " · " + dev.name, wrap, null, true);
+
+  let sent = "", sending = Promise.resolve(), timer = null;
+  const sync = () => {
+    const v = field.value;
+    sending = sending.then(async () => {
+      try {
+        let i = 0; while (i < sent.length && i < v.length && sent[i] === v[i]) i++;
+        const remove = sent.length - i, add = v.slice(i);
+        if (remove) await api(dev.id + "/key", { key: "del", count: remove });
+        if (add) await api(dev.id + "/text", { text: add });
+        sent = v;
+      } catch (e) { toast(e.message); }
+    });
+  };
+  field.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(sync, 150); });
+  const finish = () => { clearTimeout(timer); sync(); sending.then(() => send(dev.id, "enter")); closeSheet(); };
+  field.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); finish(); } });
+  go.onclick = finish;
+  del.onclick = () => { field.value = ""; clearTimeout(timer); sync(); field.focus(); };
+  setTimeout(() => field.focus(), 60);
+}
+
+function showSettings() {
+  const scroll = el("div", "scroll");
+  const group = (label, options, value, onPick) => {
+    scroll.appendChild(el("div", "label", label));
+    const list = el("div", "list");
+    options.forEach(([v, name]) => {
+      const b = el("button"); b.append(el("span", "", name), el("span", "check", v === value ? "✓" : ""));
+      b.onclick = () => { haptic(); onPick(v); showSettings(); };
+      list.appendChild(b);
+    });
+    scroll.appendChild(list);
+  };
+  group(t("layout"), [["classic", t("classic")], ["atv", t("appletv")]], store.get("layout", "classic"), setLayout);
+  group(t("control"), [["pad", t("clickpad")], ["touchpad", t("touchpad")]], store.get("mode", "pad"), setMode);
+  group(t("language"), [["auto", t("auto")], ["en", "English"], ["de", "Deutsch"]], store.get("lang", "auto"),
+    (v) => { store.set("lang", v); translate(); renderHeader(); });
+  if (cfg.tokenRequired) {
+    scroll.appendChild(el("div", "label", t("token")));
+    const f = el("input", "tokenfield"); f.type = "password"; f.value = store.get("token", ""); f.placeholder = t("tokenHint");
+    f.onchange = () => { store.set("token", f.value); refreshStatus(); };
+    scroll.appendChild(f);
+  }
+  const prog = el("div", "list"); const pb = el("button"); pb.append(el("span", "", t("progress")), el("small", "", "›"));
+  pb.onclick = showProgress; prog.appendChild(pb); scroll.appendChild(prog);
+  openSheet(t("settings"), scroll);
+}
+
+// The AI keeps PROGRESS.md up to date during setup; this shows it live on the phone.
+async function showProgress() {
+  const scroll = el("div", "scroll"); const pre = el("div", "progress", "…"); scroll.appendChild(pre);
+  openSheet(t("progress"), scroll, { label: t("reload"), run: showProgress });
+  try { pre.textContent = (await api("progress")).text || t("noProgress"); } catch (e) { pre.textContent = e.message; }
+}
+
+$("btnSettings").onclick = () => { haptic(); showSettings(); };
+$("tApps").onclick = () => { haptic(); showApps(); };
+$("tInputs").onclick = () => { haptic(); showInputs(); };
+$("tKb").onclick = () => { haptic(); showKeyboard(); };
+
+(async () => {
+  translate();
+  setLayout(new URLSearchParams(location.search).get("layout") || store.get("layout", "classic"));
+  setMode(new URLSearchParams(location.search).get("mode") || store.get("mode", "pad"));
+  try { cfg = await api("config"); } catch (e) { toast(t("noServer")); return; }
+  document.title = cfg.title;
+  if (!cfg.devices.some(d => d.id === current)) current = cfg.devices[0].id;
+  renderHeader(); refreshStatus(); setInterval(refreshStatus, 15000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshStatus(); });
+})();
+</script>
+</body>
+</html>
